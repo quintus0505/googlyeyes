@@ -4,36 +4,31 @@ import logging
 import datetime
 import time
 
-# Detect the current directory and add it to the sys.path
+# Detect the project root and add it to sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(current_dir, '..', '..'))
+project_root = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.append(project_root)
 
-import pandas as pd
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
-from googlyeyes.metrics.metrics import multi_match, dtw_scanpaths, sted_scanpaths
+from metrics.metrics import multi_match, dtw_scanpaths, sted_scanpaths
 from sklearn.model_selection import KFold
 import argparse
-from googlyeyes.model.data import calculate_gaze_metrics, load_and_preprocess_data
+from model.data import load_and_preprocess_data
 import os.path as osp
 from config import GAZE_INFERENCE_DIR
-from googlyeyes.model.nets import (
+from model.nets import (
     TypingGazeDataset,
     TransformerModel,
-    LSTMModel,
-    RNNModel,
-    DeiTModel,
-    T5ModelWrapper,
     multi_match_loss,
     finger_guiding_distance_loss,
     proofreading_loss,
 )
-from googlyeyes.model.summary import Logger
+from model.summary import Logger
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -720,10 +715,6 @@ def test_model(
     model.eval()
 
     mse_loss = nn.MSELoss(reduction='none')
-    if loss_type == 'mse':
-        criterion = mse_loss
-    elif loss_type == 'combined':
-        criterion = multi_match_loss
 
     if data_use != 'human':
         X_train, X_test, y_train, y_test, masks_x_train, masks_x_test, masks_y_train, masks_y_test, indices_train, indices_test, scaler_X, scaler_y, typing_data, gaze_data = load_and_preprocess_data(
@@ -919,11 +910,11 @@ def main():
     parser.add_argument("--all", action="store_true", help="Train and test all the model", default=False)
     parser.add_argument("--loss_type", type=str, choices=['mse', 'combined'], default='combined',
                         help="Loss function to use for training")
-    parser.add_argument("--data_use", type=str, choices=['both', 'human', 'simulated'], default='human',
+    parser.add_argument("--data_use", type=str, choices=['both', 'human', 'simulated'], default='both',
                         help="Use human data, simulated data, or both")
     parser.add_argument("--fpath_header", type=str, default='final_distribute', help='File path header for data use')
     parser.add_argument("--continue-training", action="store_true", help="Continue Train the model", default=True)
-    parser.add_argument("--start_epoch", type=int, help="Starting epoch for continue training", default=5500)
+    parser.add_argument("--start_epoch", type=int, help="Starting epoch for continue training", default=0)
     parser.add_argument("--pretrain-padding", action="store_true", help="Pretrain the Padding", default=False)
     parser.add_argument("--pretrain-epochs", type=int, help="pretraining epoch for padding training", default=200)
     parser.add_argument("--use-best-model", action="store_true", help="Use the best model for testing", default=True)

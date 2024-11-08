@@ -1,0 +1,11 @@
+# python=3.8
+
+torch==2.0.1
+torchvision==0.15.2
+torchaudio==2.0.2
+torchmetrics
+pandas
+tqdm
+scikit-learn
+fastdtw
+tensorboard

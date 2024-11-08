@@ -6,30 +6,29 @@ import time
 
 # Detect the current directory and add it to the sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(current_dir, '..', '..'))
+project_root = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.append(project_root)
 
-import pandas as pd
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
-from googlyeyes.metrics.metrics import multi_match, dtw_scanpaths, sted_scanpaths
+from metrics.metrics import multi_match, dtw_scanpaths, sted_scanpaths
 from sklearn.model_selection import KFold
 import argparse
-from googlyeyes.model.data import calculate_gaze_metrics, load_and_preprocess_data
+from model.data import load_and_preprocess_data
 import os.path as osp
 from config import GAZE_INFERENCE_DIR
-from googlyeyes.model.nets import (
+from model.nets import (
     TypingGazeInferenceDataset,
-    TransformerInferenceModel,
+    GooglyeyesModel,
     multi_match_loss,
     finger_guiding_distance_loss,
     proofreading_loss,
 )
-from googlyeyes.model.summary import Logger
+from model.summary import Logger
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -88,10 +87,10 @@ def train_model(
 
     def initialize_model():
         if model_type == "transformer":
-            return TransformerInferenceModel(input_dim=input_dim, output_dim=output_dim,
+            return GooglyeyesModel(input_dim=input_dim, output_dim=output_dim,
                                              user_param_dim=user_params_dim, dropout=0.1).to(device)
         else:
-            raise ValueError("Unsupported model type. Choose 'transformer', 'lstm', 'rnn', 'deit', or 't5'.")
+            raise ValueError("Unsupported model type")
 
     # Initialize the model, loss function, and optimizer
     output_dim = 3 if include_duration else 2  # Set output dimension based on whether duration is included
@@ -675,7 +674,7 @@ def test_model(
 
     def initialize_model():
         if model_type == "transformer":
-            return TransformerInferenceModel(input_dim=input_dim, output_dim=output_dim,
+            return GooglyeyesModel(input_dim=input_dim, output_dim=output_dim,
                                              user_param_dim=user_params_dim, dropout=0.1).to(device)
         else:
             raise ValueError("Unsupported model type. Choose 'transformer', 'lstm', 'rnn', or 'deit'.")
@@ -873,7 +872,7 @@ def main():
     parser.add_argument("--all", action="store_true", help="Train and test all the model", default=False)
     parser.add_argument("--loss_type", type=str, choices=['mse', 'combined'], default='combined',
                         help="Loss function to use for training")
-    parser.add_argument("--data_use", type=str, choices=['both', 'human', 'simulated'], default='human',
+    parser.add_argument("--data_use", type=str, choices=['both', 'human', 'simulated'], default='both',
                         help="Use human data, simulated data, or both")
     parser.add_argument("--fpath_header", type=str, default='final_distribute', help='File path header for data use')
     parser.add_argument("--continue-training", action="store_true", help="Continue Train the model", default=True)

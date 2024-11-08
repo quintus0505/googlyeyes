@@ -3,22 +3,20 @@ import os
 
 # Detect the current directory and add it to the sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(current_dir, '..', '..'))
+project_root = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.append(project_root)
 
 import pandas as pd
 import os.path as osp
 import os
 from config import DEFAULT_DATA_DIR, DEFAULT_ROOT_DIR, GAZE_INFERENCE_DIR
-from googlyeyes.data.typing_config import how_we_type_filtered_trails_one_finger
+from config import how_we_type_filtered_trails_one_finger, how_we_type_key_coordinate
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from googlyeyes.data.typing_config import how_we_type_key_coordinate
 import pickle
-import pygame
 from tqdm import tqdm
 from torchmetrics.text import CharErrorRate
-from googlyeyes.model.nets import AmortizedInferenceMLP
+from model.nets import AmortizedInferenceMLP
 import torch
 
 # Define file names and columns
@@ -29,7 +27,7 @@ typinglog_columns = ['index', 'trailtime', 'key', 'x', 'y', 'duration']
 gaze_columns = ['index', 'trailtime', 'x', 'y', 'duration']
 
 # Define directories
-HOW_WE_TYPE_DATA_DIR = osp.join(osp.dirname(DEFAULT_ROOT_DIR), 'The-37K-Dataset-Analysis', 'How_we_type_data')
+HOW_WE_TYPE_DATA_DIR = osp.join(osp.dirname(DEFAULT_DATA_DIR), 'data', 'how_we_type')
 HOW_WE_TYPE_GAZE_DATA_DIR = osp.join(HOW_WE_TYPE_DATA_DIR, 'How_we_type_mobile_dataset_gaze')
 HOW_WE_TYPE_TYPING_LOG_DATA_DIR = osp.join(HOW_WE_TYPE_DATA_DIR, 'How_we_type_mobile_dataset_typing_log')
 
@@ -336,8 +334,8 @@ def load_human_data(calculate_params=False):
                     continue
                 group = group[group['trailtime'] >= 0]
                 group = group[group['trailtime'] <= typinglog_group['trailtime'].max() + 100]
-                group = scale_to_range(group, 'x', x_min + 30, x_max - 30, 1.22)
-                group = scale_to_range(group, 'y', y_min, y_max, 1.28)
+                group = scale_to_range(group, 'x', x_min + 30, 1.22)
+                group = scale_to_range(group, 'y', y_min, 1.28)
 
                 group = reshaping_to_1080_1920(group, 'x', 'y')
 
@@ -377,7 +375,7 @@ def load_human_data(calculate_params=False):
         hidden_size = 128  # Can be adjusted
         output_size = 3  # Use only the first 3 dimensions of params
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model_save_path = os.path.join(GAZE_INFERENCE_DIR, "model", "outputs", "amortized_inference.pth")
+        model_save_path = os.path.join(GAZE_INFERENCE_DIR, "model", "best_outputs", "amortized_inference.pth")
         model = AmortizedInferenceMLP(input_size, hidden_size, output_size).to(device)
         model.load_state_dict(torch.load(model_save_path))
         model.eval()
