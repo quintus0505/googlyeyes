@@ -2,9 +2,9 @@ import os.path as osp
 import pandas as pd
 import os
 import numpy as np
-from googlyeyes.utils import HOW_WE_TYPE_TYPING_LOG_DATA_DIR, HOW_WE_TYPE_GAZE_DATA_DIR, \
+from config import HOW_WE_TYPE_TYPING_LOG_DATA_DIR, HOW_WE_TYPE_GAZE_DATA_DIR, \
     HOW_WE_TYPE_FINGER_DATA_DIR, GAZE_INFERENCE_DIR
-from human_errors.metrics.string_tools import *
+from string_tools import *
 import Levenshtein as lev
 
 LOG_DIR = osp.join(HOW_WE_TYPE_TYPING_LOG_DATA_DIR, 'Typing_log')

@@ -5,21 +5,15 @@ import numpy as np
 import pygame
 import torch
 from config import GAZE_INFERENCE_DIR
-from model.nets import TransformerModel, GooglyeyesModel, create_target_mask
-from model.data import load_human_data, load_and_preprocess_data, rebuild_input, \
-    calculate_single_trail_gaze_metrics, calculate_single_trail_finger_metrics, TYPING_LOG_DIR, DEFAULT_DATA_DIR, calculate_gaze_metrics
-from metrics.metrics import multi_match
+from model.nets import TransformerModel, GooglyeyesModel, create_target_mask, TypingGazeInferenceDataset
+from model.data import load_and_preprocess_data, calculate_gaze_metrics
 from config import how_we_type_key_coordinate_resized
-from sklearn.preprocessing import StandardScaler
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 from tqdm import tqdm
-import shutil
 import copy
-import json
 from sklearn.metrics.pairwise import cosine_similarity
-from analysis.correlation_study import plot_distances, FIG_DIR
+from correlation_study import plot_distances, FIG_DIR
 import pandas as pd
-import cv2
 import seaborn as sns
 import matplotlib.pyplot as plt
 from model.nets import TypingGazeDataset
@@ -27,7 +21,7 @@ from model.nets import TypingGazeDataset
 keyboard_image_path = osp.join(GAZE_INFERENCE_DIR, 'figs', 'chi_keyboard.png')
 video_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'videos')
 # saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'model', 'outputs')
-saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'model', 'publishable_outputs')
+saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'model', 'best_outputs')
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
@@ -36,16 +30,15 @@ tail_offset = -1000
 head_offset = 1000
 
 
-def analysis(include_key, model_type='lstm', max_pred_len=32, loss_type='mse', data_use='human',
-             fpath_header='train', autoregressive=False, amortized_inference=False, use_rl=False,
-             use_rl_pretrained=False, user_index=None, loss_study_choice=None, analysis_data_choice='test'):
+def analysis(model_type='transformer', max_pred_len=32, loss_type='combined', data_use='human',
+             fpath_header='train', amortized_inference=False, user_index=None, analysis_data_choice='test'):
     X_train, X_test, y_train, y_test, masks_x_train, masks_x_test, masks_y_train, masks_y_test, indices_train, indices_test, scaler_X, scaler_y, typing_data, gaze_data = load_and_preprocess_data(
-        include_key, include_duration=True, max_pred_len=max_pred_len, max_len=max_pred_len, data_use=data_use,
+        include_key=False, include_duration=True, max_pred_len=max_pred_len, max_len=max_pred_len, data_use=data_use,
         fpath_header=fpath_header,
         calculate_params=amortized_inference)
     include_duration = True
     if not amortized_inference:
-        img_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'how_we_type', model_type + '_' + data_use)
+        img_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'analysis', model_type + '_' + data_use)
 
         test_dataset = TypingGazeDataset(X_test, y_test, masks_x_test, masks_y_test, indices_test)
         test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
@@ -55,42 +48,9 @@ def analysis(include_key, model_type='lstm', max_pred_len=32, loss_type='mse', d
         input_dim = X_train.shape[2]
         output_dim = 3 if include_duration else 2
 
-        model = LSTMModel(input_dim, output_dim).to(device) if model_type == 'lstm' else \
-            TransformerModel(input_dim, output_dim).to(device) if model_type == 'transformer' else \
-                RNNModel(input_dim, output_dim).to(device) if model_type == 'rnn' else \
-                    DeiTModel(input_dim, output_dim).to(device)
-        model_filename = f'{model_type}_{loss_type}_{data_use}_model_with_key_with_duration.pth' if include_key and include_duration else \
-            f'{model_type}_{loss_type}_{data_use}_model_with_key_without_duration.pth' if include_key else \
-                f'{model_type}_{loss_type}_{data_use}_model_without_key_with_duration.pth' if include_duration else \
-                    f'{model_type}_{loss_type}_{data_use}_model_without_key_without_duration.pth'
+        model = TransformerModel(input_dim, output_dim).to(device)
+        model_filename = f'{model_type}_{loss_type}_{data_use}_model_without_key_with_duration.pth'
 
-        if autoregressive:
-            model_filename = 'autoregressive_' + model_filename
-            model = TransformerModelTeacherForcing(input_dim=input_dim, output_dim=output_dim, dropout=0.1).to(device)
-            img_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'how_we_type',
-                                      'autoregressive_' + model_type + '_' + data_use)
-        if use_rl:
-            model_filename = f'autoregressive_rl_{model_type}_{data_use}_model_finetuned.pth'
-            model = TransformerModelTeacherForcingRL(input_dim=input_dim, output_dim=output_dim).to(device)
-            img_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'how_we_type',
-                                      'autoregressive_rl_' + model_type + '_' + data_use + '_finetuned')
-        if use_rl_pretrained:
-            model_filename = f'autoregressive_rl_{model_type}_{data_use}_model.pth'
-            model = TransformerModelTeacherForcingRL(input_dim=input_dim, output_dim=output_dim).to(device)
-            img_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'how_we_type',
-                                      'autoregressive_rl_' + model_type + '_' + data_use)
-
-        if data_use == 'human' and loss_study_choice:
-            if loss_study_choice == 'no_length':
-                model_filename = 'transformer_multimatch_human_model_without_key_with_duration_no_length_loss.pth'
-            elif loss_study_choice == 'no_position':
-                model_filename = 'transformer_multimatch_human_model_without_key_with_duration_no_position_loss.pth'
-            elif loss_study_choice == 'no_finger_guiding':
-                model_filename = 'transformer_multimatch_human_model_without_key_with_duration_no_finger_guiding_loss.pth'
-            elif loss_study_choice == 'no_proofreading':
-                model_filename = 'transformer_multimatch_human_model_without_key_with_duration_no_proofreading_loss.pth'
-            else:
-                model_filename = 'transformer_multimatch_human_model_without_key_with_duration.pth'
     else:
         user_params_train = X_train[:, :, 3:6]  # Shape (batch_size, seq_len, 3)
         features_train = X_train[:, :, :3]  # Shape (batch_size, seq_len, 3)
@@ -104,10 +64,10 @@ def analysis(include_key, model_type='lstm', max_pred_len=32, loss_type='mse', d
         output_dim = 3 if include_duration else 2
 
         if model_type == "transformer":
-            model = TransformerInferenceModel(input_dim=input_dim, output_dim=output_dim,
-                                              user_param_dim=user_params_dim, dropout=0.1).to(device)
+            model = GooglyeyesModel(input_dim=input_dim, output_dim=output_dim,
+                                    user_param_dim=user_params_dim, dropout=0.1).to(device)
         else:
-            model = LSTMModel(input_dim=input_dim, output_dim=output_dim, dropout=0.1).to(device)
+            raise ValueError("Only transformer model is supported for amortized inference")
 
         model_filename = f'amortized_inference_{model_type}_{data_use}_model.pth'
 
@@ -119,7 +79,7 @@ def analysis(include_key, model_type='lstm', max_pred_len=32, loss_type='mse', d
                                                    user_params_train)
         train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)  # Use a larger batch size
 
-        img_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'how_we_type',
+        img_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'analysis',
                                   'amortized_inference_' + model_type + '_' + data_use)
     last_modified_time = time.ctime(os.path.getmtime(osp.join(saved_model_dir, model_filename)))
     print("Loading model from {}".format(osp.join(saved_model_dir, model_filename)))
@@ -127,7 +87,7 @@ def analysis(include_key, model_type='lstm', max_pred_len=32, loss_type='mse', d
     model.load_state_dict(torch.load(osp.join(saved_model_dir, model_filename), map_location=device))
     model.eval()
     if analysis_data_choice == 'both':
-        img_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'how_we_type', 'ground_truth')
+        img_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'analysis', 'ground_truth')
     if not osp.exists(img_output_dir):
         os.makedirs(img_output_dir)
 
@@ -179,127 +139,34 @@ def analysis(include_key, model_type='lstm', max_pred_len=32, loss_type='mse', d
                     masks_y = masks_y.squeeze(0)
                     current_typing_data = typing_data[typing_data['index'] == index[0]]
                     max_trailtime = current_typing_data['trailtime'].max()
-                    if not autoregressive:
 
-                        src_mask = create_padding_mask(masks_x.unsqueeze(0)) if model_type == "transformer" else None
-                        gaze_mean, gaze_log_std, padding_outputs = model(inputs.unsqueeze(0),
-                                                                         src_mask) if model_type == "transformer" else model(
-                            inputs.unsqueeze(0))
-                        gaze_std = torch.exp(gaze_log_std)
-                        epsilon = torch.randn_like(gaze_mean)  # Same shape as gaze_mean
-                        gaze_outputs = gaze_mean + gaze_std * epsilon
-                        gaze_outputs = gaze_outputs.squeeze(0)
-                        padding_outputs = padding_outputs.squeeze(0)
+                    src_mask = create_padding_mask(masks_x.unsqueeze(0)) if model_type == "transformer" else None
+                    gaze_mean, gaze_log_std, padding_outputs = model(inputs.unsqueeze(0),
+                                                                     src_mask) if model_type == "transformer" else model(
+                        inputs.unsqueeze(0))
+                    gaze_std = torch.exp(gaze_log_std)
+                    epsilon = torch.randn_like(gaze_mean)  # Same shape as gaze_mean
+                    gaze_outputs = gaze_mean + gaze_std * epsilon
+                    gaze_outputs = gaze_outputs.squeeze(0)
+                    padding_outputs = padding_outputs.squeeze(0)
 
-                        # Convert to numpy arrays
-                        gaze_outputs_np = gaze_outputs.cpu().numpy()
-                        targets_np = targets.cpu().numpy()
-                        masks_y_np = masks_y.cpu().numpy()
+                    # Convert to numpy arrays
+                    gaze_outputs_np = gaze_outputs.cpu().numpy()
+                    targets_np = targets.cpu().numpy()
+                    masks_y_np = masks_y.cpu().numpy()
 
-                        # Reshape to 2D before inverse transforming
-                        gaze_outputs_reshaped = gaze_outputs_np.reshape(-1, output_dim)
-                        targets_reshaped = targets_np.reshape(-1, output_dim)
+                    # Reshape to 2D before inverse transforming
+                    gaze_outputs_reshaped = gaze_outputs_np.reshape(-1, output_dim)
+                    targets_reshaped = targets_np.reshape(-1, output_dim)
 
-                        # Inverse transform
-                        gaze_outputs_inv = scaler_y.inverse_transform(gaze_outputs_reshaped)
-                        targets_inv = scaler_y.inverse_transform(targets_reshaped)
+                    # Inverse transform
+                    gaze_outputs_inv = scaler_y.inverse_transform(gaze_outputs_reshaped)
+                    targets_inv = scaler_y.inverse_transform(targets_reshaped)
 
-                        # Limit the prediction and target lengths to max_pred_len
-                        valid_gaze_outputs = gaze_outputs_inv[:max_pred_len]
-                        valid_targets = targets_inv[:max_pred_len]
-                        valid_masks_y_np = masks_y_np[:max_pred_len]
-
-                    else:
-                        src = inputs.to(device)
-                        tgt = targets.to(device)
-                        src_padding_mask = (masks_x == 0)
-
-                        gaze_outputs = []
-                        padding_outputs = []
-
-                        # use the first inputs x,y as the first gaze, duration set to 500 ms
-                        # should first use the scaler to transform the inputs to original scale,
-                        # get the first x, y set the duration to 500 ms, then transform back to the normalized scale
-                        first_typing_data = scaler_X.inverse_transform(inputs.cpu().numpy())[0]
-                        first_typing_data = torch.tensor(
-                            [[first_typing_data[0], first_typing_data[1], first_gaze_duration]]).to(device)
-                        first_tgt = scaler_y.transform(first_typing_data.cpu().numpy())[0]
-                        tgt_input = torch.tensor(first_tgt).unsqueeze(0).to(device)  # Shape (1, 3)
-                        for step in range(max_pred_len - 1):
-                            # Create tgt_mask for current sequence length
-                            tgt_mask = create_target_mask(tgt_input.size(0)).to(device)
-
-                            # Forward pass for a single step
-                            if use_rl:
-                                gaze_mean, gaze_log_std, padding_step_output = model(
-                                    src.unsqueeze(0),
-                                    tgt_input.unsqueeze(0),
-                                    src_mask=None,
-                                    tgt_mask=tgt_mask,
-                                    src_padding_mask=src_padding_mask.unsqueeze(0),
-                                    tgt_padding_mask=None
-                                )
-
-                                # Get the predicted gaze (x, y, duration) for the current step
-                                predicted_gaze_mean = gaze_mean[:, -1, :]  # Get the last predicted step
-                                predicted_gaze_std = torch.exp(gaze_log_std[:, -1, :])
-                                predicted_padding = padding_step_output[:, -1]  # Get the last predicted padding
-
-                                # Sample gaze positions
-                                # predicted_gaze = predicted_gaze_mean + predicted_gaze_std * torch.randn_like(predicted_gaze_std)
-                                predicted_gaze = predicted_gaze_mean
-                            else:
-                                gaze_step_output, padding_step_output = model(
-                                    src.unsqueeze(0),  # src -> [seq_len, 1, 256]
-                                    tgt_input.unsqueeze(0),  # tgt_input -> [current_seq_len, 1, 256]
-                                    src_mask=None,
-                                    tgt_mask=tgt_mask,  # tgt_mask -> [current_seq_len, current_seq_len]
-                                    src_padding_mask=src_padding_mask.unsqueeze(0),  # src_padding_mask -> [1, seq_len]
-                                    tgt_padding_mask=None  # No tgt_padding_mask needed
-                                )  # No padding mask for tgt
-
-                                # Get the predicted gaze (x, y, duration) for the current step
-                                predicted_gaze = gaze_step_output[:, -1, :]  # Get the last predicted step
-                                predicted_padding = padding_step_output[:, -1]  # Get the last predicted padding
-
-                            # Append the predicted gaze and padding to the output lists
-                            gaze_outputs.append(predicted_gaze)
-                            padding_outputs.append(predicted_padding)
-
-                            # Use the predicted gaze as the next input in the sequence
-                            tgt_input = torch.cat([tgt_input, predicted_gaze], dim=0)  # Append prediction
-
-                        # Concatenate all gaze outputs for the current input
-                        gaze_outputs = torch.cat(gaze_outputs, dim=0)
-                        padding_outputs = torch.cat(padding_outputs, dim=0)
-
-                        # the first padding_outputs is always 1, concate the rest with the padding_outputs shape
-                        padding_outputs = torch.cat([torch.tensor([1]).to(device), padding_outputs], dim=0)
-
-                        # Convert to numpy arrays
-                        gaze_outputs_np = gaze_outputs.cpu().numpy()
-                        targets_np = targets.cpu().numpy()
-                        masks_y_np = masks_y.cpu().numpy()
-
-                        # Reshape to 2D before inverse transforming
-                        gaze_outputs_reshaped = gaze_outputs_np.reshape(-1, output_dim)
-                        targets_reshaped = targets_np.reshape(-1, output_dim)
-
-                        # Inverse transform
-                        gaze_outputs_inv = scaler_y.inverse_transform(gaze_outputs_reshaped)
-                        targets_inv = scaler_y.inverse_transform(targets_reshaped)
-                        typing_data_inv = scaler_X.inverse_transform(inputs.cpu().numpy())
-
-                        # the first gaze could be on the first typing_data, use the same x and y
-                        # with 500 ms duration, concate the rest with the gaze_outputs shape
-                        gaze_outputs_inv = np.concatenate(
-                            [[[typing_data_inv[0][0], typing_data_inv[0][1], first_gaze_duration]], gaze_outputs_inv],
-                            axis=0)
-
-                        # Limit the prediction and target lengths to max_pred_len
-                        valid_gaze_outputs = gaze_outputs_inv[:max_pred_len]
-                        valid_targets = targets_inv[:max_pred_len]
-                        valid_masks_y_np = masks_y_np[:max_pred_len]
+                    # Limit the prediction and target lengths to max_pred_len
+                    valid_gaze_outputs = gaze_outputs_inv[:max_pred_len]
+                    valid_targets = targets_inv[:max_pred_len]
+                    valid_masks_y_np = masks_y_np[:max_pred_len]
 
                     # Use predicted padding instead of original mask
                     predicted_masks_y_np = (padding_outputs[:max_pred_len] > 0.5).cpu().numpy()
@@ -775,20 +642,6 @@ def analysis(include_key, model_type='lstm', max_pred_len=32, loss_type='mse', d
 
     plot_key_counts(ground_truth_all_keys_on_keyboard, save_dir=img_output_dir, position='keyboard', )
     plot_key_counts(ground_truth_all_keys_on_text_entry, save_dir=img_output_dir, position='text_entry')
-    # remove the key in prediction_all_keys if the key is not in ground_truth_all_keys
-    # for key in list(prediction_all_keys_.keys()):
-    #     if key not in ground_truth_all_keys:
-    #         prediction_all_keys.pop(key)
-    # for key in list(ground_truth_all_keys.keys()):
-    #     if key not in prediction_all_keys:
-    #         ground_truth_all_keys.pop(key)
-    # # if the key count < 5, remove the key
-    # for key in list(prediction_all_keys.keys()):
-    #     if len(prediction_all_keys[key]) < 5:
-    #         prediction_all_keys.pop(key)
-    # for key in list(ground_truth_all_keys.keys()):
-    #     if len(ground_truth_all_keys[key]) < 5:
-    #         ground_truth_all_keys.pop(key)
 
     for key in list(prediction_all_keys_on_keyboard.keys()):
         if key not in ground_truth_all_keys_on_keyboard:
@@ -875,15 +728,6 @@ def analysis(include_key, model_type='lstm', max_pred_len=32, loss_type='mse', d
                                      save_dir=img_output_dir, position='keyboard')
         process_distance_vs_position(ground_truth_all_distances_on_text_entry, gaze_data_source='ground_truth',
                                      save_dir=img_output_dir, position='text_entry')
-
-        # process_key_vs_position(copy.deepcopy(prediction_all_keys), gaze_data_source='predicted',
-        #                         save_dir=img_output_dir)
-        # generate_proofreading_heatmap(copy.deepcopy(prediction_all_keys), save_dir=img_output_dir,
-        #                               gaze_data_source='predicted')
-        # process_iki_vs_position(prediction_ikis, iki_mean_list, gaze_data_source='predicted',
-        #                         save_dir=img_output_dir)
-        # process_distance_vs_position(prediction_all_distances, gaze_data_source='predicted',
-        #                              save_dir=img_output_dir)
 
         process_key_vs_position(copy.deepcopy(prediction_all_keys_on_keyboard), gaze_data_source='predicted',
                                 save_dir=img_output_dir, position='keyboard')
@@ -1076,17 +920,6 @@ def generate_proofreading_heatmap(all_keys, keyboard_image_path=keyboard_image_p
     backspace_char = ['<']  # Backspace should have its own color
     fourth_row_char = [' ']  # Space is on the fourth row
 
-    # all_keys_file_path = os.path.join(save_dir, 'all_keys_proofreading_for_each_key_' + gaze_data_source + '.json')
-    # if all_keys is None:
-    #     if not os.path.exists(all_keys_file_path):
-    #         raise ValueError(f"all_keys file not found at {all_keys_file_path}")
-    #     else:
-    #         with open(all_keys_file_path, 'r') as f:
-    #             all_keys = json.load(f)
-    # else:
-    #     with open(all_keys_file_path, 'w') as f:
-    #         json.dump(all_keys, f)
-
     # Change the key '<' to B
     if '<' in all_keys:
         all_keys['<'] = all_keys.pop('B')
@@ -1132,7 +965,6 @@ def generate_proofreading_heatmap(all_keys, keyboard_image_path=keyboard_image_p
     font = pygame.font.SysFont(None, 48, bold=False)
 
     # Draw rectangles on the heatmap surface based on proofreading rate data
-    i = 0
     for key, coords in how_we_type_key_coordinate.items():
         if key in normalized_rates:  # Only draw if the key exists in normalized rates
             # Calculate the alpha based on normalized proofreading rate (frequency of proofreading)
@@ -1193,17 +1025,6 @@ def generate_keyboard_heatmap_based_on_count(all_keys, keyboard_image_path=keybo
     third_row_char = ['z', 'x', 'c', 'v', 'b', 'n', 'm']
     backspace_char = ['<']  # Backspace should have its own color
     fourth_row_char = [' ']  # Space is on the fourth row
-
-    # all_keys_file_path = os.path.join(save_dir, 'all_keys_count_for_each_key_' + gaze_data_source + '.json')
-    # if all_keys is None:
-    #     if not os.path.exists(all_keys_file_path):
-    #         raise ValueError(f"all_keys file not found at {all_keys_file_path}")
-    #     else:
-    #         with open(all_keys_file_path, 'r') as f:
-    #             all_keys = json.load(f)
-    # else:
-    #     with open(all_keys_file_path, 'w') as f:
-    #         json.dump(all_keys, f)
 
     # Change the key '<' to B
     # if < exists:
@@ -1989,35 +1810,22 @@ def distance_and_cosine_similarity_analysis(index, typing_data, gaze_log, screen
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Visualize Typing Log and Gaze Movements")
-    parser.add_argument("--model_type", choices=["lstm", "transformer", "rnn", "deit"], default="transformer",
+    parser.add_argument("--model_type", choices=["transformer"], default="transformer",
                         help="Type of model to use for prediction")
-    parser.add_argument("--include_key", action="store_true", help="Include key in the input features", default=False)
     parser.add_argument("--max_pred_len", type=int, default=32, help="Maximum number of gaze data points to predict")
-    parser.add_argument("--loss_type", type=str, choices=['mse', 'multimatch'], default='multimatch',
+    parser.add_argument("--loss_type", type=str, choices=['mse', 'combined'], default='combined',
                         help="Loss function to use for training")
-    parser.add_argument("--data_use", type=str, choices=['both', 'human', 'simulated'], default='both',
+    parser.add_argument("--data_use", type=str, choices=['both', 'human'], default='both',
                         help="Use human data, simulated data, or both")
     parser.add_argument("--fpath_header", type=str, default='final_distribute', help='File path header for data use')
-    parser.add_argument("--autoregressive", action="store_true", help="Use autoregressive model (NOT USE ANYMORE)",
-                        default=False)
     parser.add_argument("--amortized-inference", action="store_true", help="Use amortized inference", default=True)
-    parser.add_argument("--use_rl", action="store_true", help="Use RL", default=False)
-    parser.add_argument("--use_rl_pretrained", action="store_true", help="Use RL Pretrained", default=False)
     parser.add_argument("--user_index", type=str, default=None, choices=['129', '130', '131', '132', '133', None])
-    parser.add_argument('--loss_study_choice', type=str, default=None,
-                        choices=['no_length', 'no_position', 'no_finger_guidance', 'no_proofreading', None])
     args = parser.parse_args()
-    if args.use_rl:
-        args.autoregressive = True
     print("visualizing with model type: ", args.model_type)
     print("Visualizing with data use: ", args.data_use)
     print("Using amortized inference:", args.amortized_inference)
-    print("Using autoregressive model:", args.autoregressive)
-    print("Using RL model:", args.use_rl)
-    analysis(args.include_key, args.model_type, 32, args.loss_type, args.data_use,
-             args.fpath_header, args.autoregressive, args.amortized_inference, args.use_rl, args.use_rl_pretrained,
-             user_index=args.user_index, loss_study_choice=args.loss_study_choice,
-             analysis_data_choice='test')
+    analysis(args.model_type, 32, args.loss_type, args.data_use, args.fpath_header, args.amortized_inference,
+             user_index=args.user_index, analysis_data_choice='test')
 
 
 if __name__ == "__main__":

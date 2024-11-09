@@ -4,15 +4,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-from googlyeyes.data.typing_config import how_we_type_key_coordinate
-from googlyeyes.utils import HOW_WE_TYPE_TYPING_LOG_DATA_DIR, HOW_WE_TYPE_GAZE_DATA_DIR, \
+from config import how_we_type_key_coordinate, HOW_WE_TYPE_TYPING_LOG_DATA_DIR, HOW_WE_TYPE_GAZE_DATA_DIR, \
     HOW_WE_TYPE_FINGER_DATA_DIR, GAZE_INFERENCE_DIR
 from sklearn.preprocessing import normalize
 from scipy.stats import pearsonr
 from sklearn.metrics.pairwise import cosine_similarity
-from googlyeyes.analysis.error_rate_analysis import load_sentences_df
-from googlyeyes.analysis.traj_visualization import reshaping_to_1080_1920, reshaping_typing_log_to_1080_1920
-from human_errors.metrics.string_tools import *
+from error_rate_analysis import load_sentences_df
+from traj_visualization import reshaping_to_1080_1920, reshaping_typing_log_to_1080_1920
+from string_tools import reformat_input, flag_input_stream, min_string_distance, align, stream_align, \
+    assign_position_values, error_detection, count_component
 import Levenshtein as lev
 
 # Provided configurations

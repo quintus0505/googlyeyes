@@ -11,3 +11,4 @@ fastdtw
 tensorboard
 opencv-python
 mesa
+Levenshtein

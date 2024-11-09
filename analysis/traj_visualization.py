@@ -1,15 +1,11 @@
-from googlyeyes.utils import HOW_WE_TYPE_TYPING_LOG_DATA_DIR, HOW_WE_TYPE_GAZE_DATA_DIR, \
-    HOW_WE_TYPE_FINGER_DATA_DIR, GAZE_INFERENCE_DIR
+from config import HOW_WE_TYPE_TYPING_LOG_DATA_DIR, HOW_WE_TYPE_GAZE_DATA_DIR, \
+    HOW_WE_TYPE_FINGER_DATA_DIR, GAZE_INFERENCE_DIR, how_we_type_key_coordinate
 import pandas as pd
-from googlyeyes.data.typing_config import how_we_type_key_coordinate
 # Disable SettingWithCopyWarning
 pd.options.mode.chained_assignment = None  # default='warn'
 import os
 import os.path as osp
 import matplotlib.pyplot as plt
-import numpy as np
-from scipy.optimize import least_squares
-from scipy.optimize import minimize
 import torch
 import torch.nn as nn
 import torch.optim as optim
