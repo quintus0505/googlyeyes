@@ -103,6 +103,9 @@ def train_model(
             f'{model_type}_{loss_type}_{data_use}_model_without_key_with_duration.pth' if include_duration else \
                 f'{model_type}_{loss_type}_{data_use}_model_without_key_without_duration.pth'
 
+    if not osp.exists(saved_model_dir):
+        os.makedirs(saved_model_dir)
+
     if use_k_fold:
         kf = KFold(n_splits=k_folds, shuffle=True, random_state=42)
 
@@ -906,11 +909,11 @@ def main():
     parser.add_argument("--k_folds", type=int, default=12, help="Number of folds for k-fold cross-validation")
     parser.add_argument("--max_pred_len", type=int, default=32, help="Maximum number of gaze data points to predict")
     parser.add_argument("--use_k_fold", action="store_true", help="Use k-fold cross-validation", default=True)
-    parser.add_argument("--num_epochs", type=int, default=6000, help="Number of epochs to train the model")
+    parser.add_argument("--num_epochs", type=int, default=60, help="Number of epochs to train the model")
     parser.add_argument("--all", action="store_true", help="Train and test all the model", default=False)
     parser.add_argument("--loss_type", type=str, choices=['mse', 'combined'], default='combined',
                         help="Loss function to use for training")
-    parser.add_argument("--data_use", type=str, choices=['both', 'human', 'simulated'], default='both',
+    parser.add_argument("--data_use", type=str, choices=['both', 'human', 'simulated'], default='human',
                         help="Use human data, simulated data, or both")
     parser.add_argument("--fpath_header", type=str, default='final_distribute', help='File path header for data use')
     parser.add_argument("--continue-training", action="store_true", help="Continue Train the model", default=True)
@@ -952,8 +955,8 @@ def main():
         logging.info("current data source: {}".format(args.data_use))
         logging.info("use best model: {}".format(args.use_best_model))
 
-    if args.use_best_model:
-        args.train = False
+    if args.train:
+        args.use_best_model = False
 
     if args.train:
         train_model(

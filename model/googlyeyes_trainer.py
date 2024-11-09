@@ -112,6 +112,9 @@ def train_model(
     # Save the model and scalers
     model_filename = f'amortized_inference_{model_type}_{data_use}_model.pth'
 
+    if not osp.exists(saved_model_dir):
+        os.makedirs(saved_model_dir)
+
     if use_k_fold:
         kf = KFold(n_splits=k_folds, shuffle=True, random_state=42)
 
@@ -914,11 +917,8 @@ def main():
         logging.info("current data source: {}".format(args.data_use))
         logging.info("use best model: {}".format(args.use_best_model))
 
-    if args.model_type == 'deit':
-        args.num_epochs = 200 * 5
-
-    if args.use_best_model:
-        args.train = False
+    if args.train:
+        args.use_best_model = False
 
     if args.train:
         train_model(

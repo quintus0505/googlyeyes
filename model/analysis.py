@@ -5,28 +5,24 @@ import numpy as np
 import pygame
 import torch
 from config import GAZE_INFERENCE_DIR
-from googlyeyes.model.nets import LSTMModel, TransformerModel, RNNModel, DeiTModel, TransformerModelTeacherForcing, \
-    create_target_mask, TransformerModelTeacherForcingRL
-from googlyeyes.model.data import load_human_data, load_and_preprocess_data, rebuild_input, \
-    calculate_single_trail_gaze_metrics, calculate_single_trail_finger_metrics, TYPING_LOG_DIR, DEFAULT_DATA_DIR
-from googlyeyes.metrics.metrics import multi_match
-from googlyeyes.data.typing_config import how_we_type_key_coordinate_resized
+from model.nets import TransformerModel, GooglyeyesModel, create_target_mask
+from model.data import load_human_data, load_and_preprocess_data, rebuild_input, \
+    calculate_single_trail_gaze_metrics, calculate_single_trail_finger_metrics, TYPING_LOG_DIR, DEFAULT_DATA_DIR, calculate_gaze_metrics
+from metrics.metrics import multi_match
+from config import how_we_type_key_coordinate_resized
 from sklearn.preprocessing import StandardScaler
-from googlyeyes.model.data import calculate_gaze_metrics
-from googlyeyes.model.nets import TransformerInferenceModelV1, TransformerInferenceModelV2, \
-    TransformerInferenceModel, TypingGazeInferenceDataset
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 import shutil
 import copy
 import json
 from sklearn.metrics.pairwise import cosine_similarity
-from googlyeyes.analysis.correlation_study import plot_distances, FIG_DIR
+from analysis.correlation_study import plot_distances, FIG_DIR
 import pandas as pd
 import cv2
 import seaborn as sns
 import matplotlib.pyplot as plt
-from googlyeyes.model.nets import TypingGazeDataset
+from model.nets import TypingGazeDataset
 
 keyboard_image_path = osp.join(GAZE_INFERENCE_DIR, 'figs', 'chi_keyboard.png')
 video_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'videos')
@@ -2026,5 +2022,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # generate_keyboard_heatmap_based_on_count(None, save_dir=osp.join(GAZE_INFERENCE_DIR, 'figs', 'how_we_type',
-    #                                                                  'ground_truth'))

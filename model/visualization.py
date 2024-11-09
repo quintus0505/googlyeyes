@@ -5,52 +5,23 @@ import time
 import pygame
 import torch
 from config import GAZE_INFERENCE_DIR
-from googlyeyes.model.nets import LSTMModel, TransformerModel, RNNModel, DeiTModel, TransformerModelTeacherForcing, \
-    create_target_mask
-from googlyeyes.model.data import load_human_data, load_and_preprocess_data, rebuild_input, \
-    calculate_single_trail_gaze_metrics, calculate_single_trail_finger_metrics, TYPING_LOG_DIR, DEFAULT_DATA_DIR
-from googlyeyes.metrics.metrics import multi_match
-from googlyeyes.data.typing_config import how_we_type_key_coordinate
-from sklearn.preprocessing import StandardScaler
-from googlyeyes.model.data import calculate_gaze_metrics
-from googlyeyes.model.nets import TransformerInferenceModelV1, TransformerInferenceModelV2, \
-    TransformerInferenceModel, TypingGazeInferenceDataset, TransformerModelTeacherForcingRL
+from model.nets import TransformerModel, create_target_mask
+from model.data import load_human_data, load_and_preprocess_data, rebuild_input, \
+    calculate_single_trail_gaze_metrics, calculate_single_trail_finger_metrics, DEFAULT_DATA_DIR
+from model.nets import GooglyeyesModel, TypingGazeInferenceDataset, TypingGazeDataset
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 import shutil
-from sklearn.metrics.pairwise import cosine_similarity
-from googlyeyes.analysis.correlation_study import plot_distances, FIG_DIR
 import pandas as pd
 import cv2
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 keyboard_image = osp.join(GAZE_INFERENCE_DIR, 'figs', 'chi_keyboard.png')
 img_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'baseline_validation')
 video_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'videos')
-saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'model', 'publishable_outputs')
+saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'model', 'best_outputs')
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
-
-
-class TypingGazeDataset(Dataset):
-    def __init__(self, X, y, masks_x, masks_y, indices):
-        self.X = X
-        self.y = y
-        self.masks_x = masks_x
-        self.masks_y = masks_y
-        self.indices = indices
-
-    def __len__(self):
-        return len(self.X)
-
-    def __getitem__(self, idx):
-        return (torch.tensor(self.X[idx], dtype=torch.float32),
-                torch.tensor(self.y[idx], dtype=torch.float32),
-                torch.tensor(self.masks_x[idx], dtype=torch.float32),
-                torch.tensor(self.masks_y[idx], dtype=torch.float32),
-                self.indices[idx])
 
 
 def visualize_gaze_and_typing(index, typing_data, gaze_data, predicted_gaze_data, model_type='lstm', data_use='human',
@@ -261,11 +232,11 @@ def color_map_predicted_gaze(x):
     return (0, 255, int((1 - x) * 255))
 
 
-def visualization(include_key, model_type='lstm', max_pred_len=32, loss_type='mse', data_use='human',
-                  fpath_header='train', autoregressive=False, amortized_inference=False, use_rl=False,
-                  use_rl_pretrained=False, visualize_text=True, visualize_user_params=False):
+def visualization(model_type='transformer', max_pred_len=32, loss_type='combined', data_use='human',
+                  fpath_header='train', amortized_inference=False, visualize_text=True, visualize_user_params=False):
     X_train, X_test, y_train, y_test, masks_x_train, masks_x_test, masks_y_train, masks_y_test, indices_train, indices_test, scaler_X, scaler_y, typing_data, gaze_data = load_and_preprocess_data(
-        include_key, include_duration=True, max_pred_len=max_pred_len, data_use=data_use, fpath_header=fpath_header,
+        include_key=False, include_duration=True, max_pred_len=max_pred_len, data_use=data_use,
+        fpath_header=fpath_header,
         calculate_params=amortized_inference)
     include_duration = True
     if not amortized_inference:
@@ -277,23 +248,8 @@ def visualization(include_key, model_type='lstm', max_pred_len=32, loss_type='ms
         input_dim = X_train.shape[2]
         output_dim = 3 if include_duration else 2
 
-        model = LSTMModel(input_dim, output_dim).to(device) if model_type == 'lstm' else \
-            TransformerModel(input_dim, output_dim).to(device) if model_type == 'transformer' else \
-                RNNModel(input_dim, output_dim).to(device) if model_type == 'rnn' else \
-                    DeiTModel(input_dim, output_dim).to(device)
-        model_filename = f'{model_type}_{loss_type}_{data_use}_model_with_key_with_duration.pth' if include_key and include_duration else \
-            f'{model_type}_{loss_type}_{data_use}_model_with_key_without_duration.pth' if include_key else \
-                f'{model_type}_{loss_type}_{data_use}_model_without_key_with_duration.pth' if include_duration else \
-                    f'{model_type}_{loss_type}_{data_use}_model_without_key_without_duration.pth'
-        if autoregressive:
-            model_filename = 'autoregressive_' + model_filename
-            model = TransformerModelTeacherForcing(input_dim=input_dim, output_dim=output_dim, dropout=0.1).to(device)
-        if use_rl:
-            model_filename = f'autoregressive_rl_{model_type}_{data_use}_model_finetuned.pth'
-            model = TransformerModelTeacherForcingRL(input_dim=input_dim, output_dim=output_dim).to(device)
-        if use_rl_pretrained:
-            model_filename = f'autoregressive_rl_{model_type}_{data_use}_model.pth'
-            model = TransformerModelTeacherForcingRL(input_dim=input_dim, output_dim=output_dim).to(device)
+        model = TransformerModel(input_dim, output_dim).to(device)
+        model_filename = f'{model_type}_{loss_type}_{data_use}_model_without_key_with_duration.pth'
     else:
         user_params_train = X_train[:, :, 3:6]  # Shape (batch_size, seq_len, 3)
         features_train = X_train[:, :, :3]  # Shape (batch_size, seq_len, 3)
@@ -307,10 +263,10 @@ def visualization(include_key, model_type='lstm', max_pred_len=32, loss_type='ms
         output_dim = 3 if include_duration else 2
 
         if model_type == "transformer":
-            model = TransformerInferenceModel(input_dim=input_dim, output_dim=output_dim,
-                                              user_param_dim=user_params_dim, dropout=0.1).to(device)
+            model = GooglyeyesModel(input_dim=input_dim, output_dim=output_dim,
+                                    user_param_dim=user_params_dim, dropout=0.1).to(device)
         else:
-            model = LSTMModel(input_dim=input_dim, output_dim=output_dim, dropout=0.1).to(device)
+            raise ValueError("Only transformer model is supported for amortized inference")
 
         model_filename = f'amortized_inference_{model_type}_{data_use}_model.pth'
 
@@ -348,127 +304,33 @@ def visualization(include_key, model_type='lstm', max_pred_len=32, loss_type='ms
                 masks_x = masks_x.squeeze(0)  # Remove batch dimension
                 masks_y = masks_y.squeeze(0)  # Remove batch dimension
 
-                if not autoregressive:
+                src_mask = create_padding_mask(masks_x.unsqueeze(0)) if model_type == "transformer" else None
+                gaze_mean, gaze_log_std, padding_outputs = model(inputs.unsqueeze(0),
+                                                                 src_mask) if model_type == "transformer" else model(
+                    inputs.unsqueeze(0))
+                gaze_std = torch.exp(gaze_log_std)
+                epsilon = torch.randn_like(gaze_mean)  # Same shape as gaze_mean
+                gaze_outputs = gaze_mean + gaze_std * epsilon
+                gaze_outputs = gaze_outputs.squeeze(0)
+                padding_outputs = padding_outputs.squeeze(0)
 
-                    src_mask = create_padding_mask(masks_x.unsqueeze(0)) if model_type == "transformer" else None
-                    gaze_mean, gaze_log_std, padding_outputs = model(inputs.unsqueeze(0),
-                                                                     src_mask) if model_type == "transformer" else model(
-                        inputs.unsqueeze(0))
-                    gaze_std = torch.exp(gaze_log_std)
-                    epsilon = torch.randn_like(gaze_mean)  # Same shape as gaze_mean
-                    gaze_outputs = gaze_mean + gaze_std * epsilon
-                    gaze_outputs = gaze_outputs.squeeze(0)
-                    padding_outputs = padding_outputs.squeeze(0)
+                # Convert to numpy arrays
+                gaze_outputs_np = gaze_outputs.cpu().numpy()
+                targets_np = targets.cpu().numpy()
+                masks_y_np = masks_y.cpu().numpy()
 
-                    # Convert to numpy arrays
-                    gaze_outputs_np = gaze_outputs.cpu().numpy()
-                    targets_np = targets.cpu().numpy()
-                    masks_y_np = masks_y.cpu().numpy()
+                # Reshape to 2D before inverse transforming
+                gaze_outputs_reshaped = gaze_outputs_np.reshape(-1, output_dim)
+                targets_reshaped = targets_np.reshape(-1, output_dim)
 
-                    # Reshape to 2D before inverse transforming
-                    gaze_outputs_reshaped = gaze_outputs_np.reshape(-1, output_dim)
-                    targets_reshaped = targets_np.reshape(-1, output_dim)
+                # Inverse transform
+                gaze_outputs_inv = scaler_y.inverse_transform(gaze_outputs_reshaped)
+                targets_inv = scaler_y.inverse_transform(targets_reshaped)
 
-                    # Inverse transform
-                    gaze_outputs_inv = scaler_y.inverse_transform(gaze_outputs_reshaped)
-                    targets_inv = scaler_y.inverse_transform(targets_reshaped)
-
-                    # Limit the prediction and target lengths to max_pred_len
-                    valid_gaze_outputs = gaze_outputs_inv[:max_pred_len]
-                    valid_targets = targets_inv[:max_pred_len]
-                    valid_masks_y_np = masks_y_np[:max_pred_len]
-
-                else:
-                    src = inputs.to(device)
-                    tgt = targets.to(device)
-                    src_padding_mask = (masks_x == 0)
-
-                    gaze_outputs = []
-                    padding_outputs = []
-
-                    # use the first inputs x,y as the first gaze, duration set to 500 ms
-                    # should first use the scaler to transform the inputs to original scale,
-                    # get the first x, y set the duration to 500 ms, then transform back to the normalized scale
-                    first_typing_data = scaler_X.inverse_transform(inputs.cpu().numpy())[0]
-                    first_typing_data = torch.tensor(
-                        [[first_typing_data[0], first_typing_data[1], first_gaze_duration]]).to(device)
-                    first_tgt = scaler_y.transform(first_typing_data.cpu().numpy())[0]
-                    tgt_input = torch.tensor(first_tgt).unsqueeze(0).to(device)  # Shape (1, 3)
-                    for step in range(max_pred_len - 1):
-                        # Create tgt_mask for current sequence length
-                        tgt_mask = create_target_mask(tgt_input.size(0)).to(device)
-
-                        # Forward pass for a single step
-                        if use_rl:
-                            gaze_mean, gaze_log_std, padding_step_output = model(
-                                src.unsqueeze(0),
-                                tgt_input.unsqueeze(0),
-                                src_mask=None,
-                                tgt_mask=tgt_mask,
-                                src_padding_mask=src_padding_mask.unsqueeze(0),
-                                tgt_padding_mask=None
-                            )
-
-                            # Get the predicted gaze (x, y, duration) for the current step
-                            predicted_gaze_mean = gaze_mean[:, -1, :]  # Get the last predicted step
-                            predicted_gaze_std = torch.exp(gaze_log_std[:, -1, :])
-                            predicted_padding = padding_step_output[:, -1]  # Get the last predicted padding
-
-                            # Sample gaze positions
-                            # predicted_gaze = predicted_gaze_mean + predicted_gaze_std * torch.randn_like(predicted_gaze_std)
-                            predicted_gaze = predicted_gaze_mean
-                        else:
-                            gaze_step_output, padding_step_output = model(
-                                src.unsqueeze(0),  # src -> [seq_len, 1, 256]
-                                tgt_input.unsqueeze(0),  # tgt_input -> [current_seq_len, 1, 256]
-                                src_mask=None,
-                                tgt_mask=tgt_mask,  # tgt_mask -> [current_seq_len, current_seq_len]
-                                src_padding_mask=src_padding_mask.unsqueeze(0),  # src_padding_mask -> [1, seq_len]
-                                tgt_padding_mask=None  # No tgt_padding_mask needed
-                            )  # No padding mask for tgt
-
-                            # Get the predicted gaze (x, y, duration) for the current step
-                            predicted_gaze = gaze_step_output[:, -1, :]  # Get the last predicted step
-                            predicted_padding = padding_step_output[:, -1]  # Get the last predicted padding
-
-                        # Append the predicted gaze and padding to the output lists
-                        gaze_outputs.append(predicted_gaze)
-                        padding_outputs.append(predicted_padding)
-
-                        # Use the predicted gaze as the next input in the sequence
-                        tgt_input = torch.cat([tgt_input, predicted_gaze], dim=0)  # Append prediction
-
-                    # Concatenate all gaze outputs for the current input
-                    gaze_outputs = torch.cat(gaze_outputs, dim=0)
-                    padding_outputs = torch.cat(padding_outputs, dim=0)
-
-                    # the first padding_outputs is always 1, concate the rest with the padding_outputs shape
-                    padding_outputs = torch.cat([torch.tensor([1]).to(device), padding_outputs], dim=0)
-
-                    # Convert to numpy arrays
-                    gaze_outputs_np = gaze_outputs.cpu().numpy()
-                    targets_np = targets.cpu().numpy()
-                    masks_y_np = masks_y.cpu().numpy()
-
-                    # Reshape to 2D before inverse transforming
-                    gaze_outputs_reshaped = gaze_outputs_np.reshape(-1, output_dim)
-                    targets_reshaped = targets_np.reshape(-1, output_dim)
-
-                    # Inverse transform
-                    gaze_outputs_inv = scaler_y.inverse_transform(gaze_outputs_reshaped)
-                    targets_inv = scaler_y.inverse_transform(targets_reshaped)
-                    typing_data_inv = scaler_X.inverse_transform(inputs.cpu().numpy())
-
-                    # the first gaze could be on the first typing_data, use the same x and y
-                    # with 500 ms duration, concate the rest with the gaze_outputs shape
-                    gaze_outputs_inv = np.concatenate(
-                        [[[typing_data_inv[0][0], typing_data_inv[0][1], first_gaze_duration]], gaze_outputs_inv],
-                        axis=0)
-
-                    # Limit the prediction and target lengths to max_pred_len
-                    valid_gaze_outputs = gaze_outputs_inv[:max_pred_len]
-                    valid_targets = targets_inv[:max_pred_len]
-                    valid_masks_y_np = masks_y_np[:max_pred_len]
+                # Limit the prediction and target lengths to max_pred_len
+                valid_gaze_outputs = gaze_outputs_inv[:max_pred_len]
+                valid_targets = targets_inv[:max_pred_len]
+                valid_masks_y_np = masks_y_np[:max_pred_len]
 
                 # Use predicted padding instead of original mask
                 predicted_masks_y_np = (padding_outputs[:max_pred_len] > 0.5).cpu().numpy()
@@ -555,11 +417,11 @@ def visualization(include_key, model_type='lstm', max_pred_len=32, loss_type='ms
                                           visualize_text=visualize_text, visualize_user_params=visualize_user_params)
 
 
-def video_generation(include_key, model_type='lstm', max_pred_len=32, loss_type='mse', data_use='human',
-                     fpath_header='train', autoregressive=False, amortized_inference=False, use_rl=False,
-                     use_rl_pretrained=False):
+def video_generation(model_type='transformer', max_pred_len=32, loss_type='combined', data_use='human',
+                     fpath_header='train', amortized_inference=False, gaze_data_source='predicted'):
     X_train, X_test, y_train, y_test, masks_x_train, masks_x_test, masks_y_train, masks_y_test, indices_train, indices_test, scaler_X, scaler_y, typing_data, gaze_data = load_and_preprocess_data(
-        include_key, include_duration=True, max_pred_len=max_pred_len, data_use=data_use, fpath_header=fpath_header,
+        include_key=False, include_duration=True, max_pred_len=max_pred_len, data_use=data_use,
+        fpath_header=fpath_header,
         calculate_params=amortized_inference)
     include_duration = True
     if not amortized_inference:
@@ -571,23 +433,9 @@ def video_generation(include_key, model_type='lstm', max_pred_len=32, loss_type=
         input_dim = X_train.shape[2]
         output_dim = 3 if include_duration else 2
 
-        model = LSTMModel(input_dim, output_dim).to(device) if model_type == 'lstm' else \
-            TransformerModel(input_dim, output_dim).to(device) if model_type == 'transformer' else \
-                RNNModel(input_dim, output_dim).to(device) if model_type == 'rnn' else \
-                    DeiTModel(input_dim, output_dim).to(device)
-        model_filename = f'{model_type}_{loss_type}_{data_use}_model_with_key_with_duration.pth' if include_key and include_duration else \
-            f'{model_type}_{loss_type}_{data_use}_model_with_key_without_duration.pth' if include_key else \
-                f'{model_type}_{loss_type}_{data_use}_model_without_key_with_duration.pth' if include_duration else \
-                    f'{model_type}_{loss_type}_{data_use}_model_without_key_without_duration.pth'
-        if autoregressive:
-            model_filename = 'autoregressive_' + model_filename
-            model = TransformerModelTeacherForcing(input_dim=input_dim, output_dim=output_dim, dropout=0.1).to(device)
-        if use_rl:
-            model_filename = f'autoregressive_rl_{model_type}_{data_use}_model_finetuned.pth'
-            model = TransformerModelTeacherForcingRL(input_dim=input_dim, output_dim=output_dim, dropout=0.1).to(device)
-        if use_rl_pretrained:
-            model_filename = f'autoregressive_rl_{model_type}_{data_use}_model.pth'
-            model = TransformerModelTeacherForcingRL(input_dim=input_dim, output_dim=output_dim, dropout=0.1).to(device)
+        model = TransformerModel(input_dim, output_dim).to(device)
+
+        model_filename = f'{model_type}_{loss_type}_{data_use}_model_without_key_with_duration.pth'
     else:
         user_params_train = X_train[:, :, 3:6]  # Shape (batch_size, seq_len, 3)
         features_train = X_train[:, :, :3]  # Shape (batch_size, seq_len, 3)
@@ -601,11 +449,10 @@ def video_generation(include_key, model_type='lstm', max_pred_len=32, loss_type=
         output_dim = 3 if include_duration else 2
 
         if model_type == "transformer":
-            model = TransformerInferenceModel(input_dim=input_dim, output_dim=output_dim,
-                                              user_param_dim=user_params_dim, dropout=0.1).to(device)
+            model = GooglyeyesModel(input_dim=input_dim, output_dim=output_dim,
+                                    user_param_dim=user_params_dim, dropout=0.1).to(device)
         else:
-            model = LSTMModel(input_dim=input_dim, output_dim=output_dim, dropout=0.1).to(device)
-
+            raise ValueError("Only transformer model is supported for amortized inference")
         model_filename = f'amortized_inference_{model_type}_{data_use}_model.pth'
 
         test_dataset = TypingGazeInferenceDataset(features_test, y_test, masks_x_test, masks_y_test, indices_test,
@@ -625,7 +472,6 @@ def video_generation(include_key, model_type='lstm', max_pred_len=32, loss_type=
         seq = seq == 0
         return seq
 
-    first_gaze_duration = 25
     with torch.no_grad():
         if not amortized_inference:
             for inputs, targets, masks_x, masks_y, index in tqdm(test_loader):
@@ -640,126 +486,33 @@ def video_generation(include_key, model_type='lstm', max_pred_len=32, loss_type=
                 masks_x = masks_x.squeeze(0)  # Remove batch dimension
                 masks_y = masks_y.squeeze(0)  # Remove batch dimension
 
-                if not autoregressive:
+                src_mask = create_padding_mask(masks_x.unsqueeze(0)) if model_type == "transformer" else None
+                gaze_mean, gaze_log_std, padding_outputs = model(inputs.unsqueeze(0),
+                                                                 src_mask) if model_type == "transformer" else model(
+                    inputs.unsqueeze(0))
+                gaze_std = torch.exp(gaze_log_std)
+                epsilon = torch.randn_like(gaze_mean)  # Same shape as gaze_mean
+                gaze_outputs = gaze_mean + gaze_std * epsilon
+                gaze_outputs = gaze_outputs.squeeze(0)
+                padding_outputs = padding_outputs.squeeze(0)
 
-                    src_mask = create_padding_mask(masks_x.unsqueeze(0)) if model_type == "transformer" else None
-                    gaze_mean, gaze_log_std, padding_outputs = model(inputs.unsqueeze(0),
-                                                                     src_mask) if model_type == "transformer" else model(
-                        inputs.unsqueeze(0))
-                    gaze_std = torch.exp(gaze_log_std)
-                    epsilon = torch.randn_like(gaze_mean)  # Same shape as gaze_mean
-                    gaze_outputs = gaze_mean + gaze_std * epsilon
-                    gaze_outputs = gaze_outputs.squeeze(0)
-                    padding_outputs = padding_outputs.squeeze(0)
+                # Convert to numpy arrays
+                gaze_outputs_np = gaze_outputs.cpu().numpy()
+                targets_np = targets.cpu().numpy()
+                masks_y_np = masks_y.cpu().numpy()
 
-                    # Convert to numpy arrays
-                    gaze_outputs_np = gaze_outputs.cpu().numpy()
-                    targets_np = targets.cpu().numpy()
-                    masks_y_np = masks_y.cpu().numpy()
+                # Reshape to 2D before inverse transforming
+                gaze_outputs_reshaped = gaze_outputs_np.reshape(-1, output_dim)
+                targets_reshaped = targets_np.reshape(-1, output_dim)
 
-                    # Reshape to 2D before inverse transforming
-                    gaze_outputs_reshaped = gaze_outputs_np.reshape(-1, output_dim)
-                    targets_reshaped = targets_np.reshape(-1, output_dim)
+                # Inverse transform
+                gaze_outputs_inv = scaler_y.inverse_transform(gaze_outputs_reshaped)
+                targets_inv = scaler_y.inverse_transform(targets_reshaped)
 
-                    # Inverse transform
-                    gaze_outputs_inv = scaler_y.inverse_transform(gaze_outputs_reshaped)
-                    targets_inv = scaler_y.inverse_transform(targets_reshaped)
-
-                    # Limit the prediction and target lengths to max_pred_len
-                    valid_gaze_outputs = gaze_outputs_inv[:max_pred_len]
-                    valid_targets = targets_inv[:max_pred_len]
-                    valid_masks_y_np = masks_y_np[:max_pred_len]
-
-                else:
-                    src = inputs.to(device)
-                    tgt = targets.to(device)
-                    src_padding_mask = (masks_x == 0)
-
-                    gaze_outputs = []
-                    padding_outputs = []
-
-                    # use the first inputs x,y as the first gaze, duration set to 500 ms
-                    # should first use the scaler to transform the inputs to original scale,
-                    # get the first x, y set the duration to 500 ms, then transform back to the normalized scale
-                    first_typing_data = scaler_X.inverse_transform(inputs.cpu().numpy())[0]
-                    first_typing_data = torch.tensor(
-                        [[first_typing_data[0], first_typing_data[1], first_gaze_duration]]).to(device)
-                    first_tgt = scaler_y.transform(first_typing_data.cpu().numpy())[0]
-                    tgt_input = torch.tensor(first_tgt).unsqueeze(0).to(device)  # Shape (1, 3)
-                    for step in range(max_pred_len - 1):
-                        # Create tgt_mask for current sequence length
-                        tgt_mask = create_target_mask(tgt_input.size(0)).to(device)
-                        if use_rl:
-                            gaze_mean, gaze_log_std, padding_step_output = model(
-                                src.unsqueeze(0),
-                                tgt_input.unsqueeze(0),
-                                src_mask=None,
-                                tgt_mask=tgt_mask,
-                                src_padding_mask=src_padding_mask.unsqueeze(0),
-                                tgt_padding_mask=None
-                            )
-
-                            # Get the predicted gaze (x, y, duration) for the current step
-                            predicted_gaze_mean = gaze_mean[:, -1, :]  # Get the last predicted step
-                            predicted_gaze_std = torch.exp(gaze_log_std[:, -1, :])
-                            predicted_padding = padding_step_output[:, -1]  # Get the last predicted padding
-
-                            # Sample gaze positions
-                            # predicted_gaze = predicted_gaze_mean + predicted_gaze_std * torch.randn_like(predicted_gaze_std)
-                            predicted_gaze = predicted_gaze_mean
-                        else:
-                            # Forward pass for a single step
-                            gaze_step_output, padding_step_output = model(
-                                src.unsqueeze(0),  # src -> [seq_len, 1, 256]
-                                tgt_input.unsqueeze(0),  # tgt_input -> [current_seq_len, 1, 256]
-                                src_mask=None,
-                                tgt_mask=tgt_mask,  # tgt_mask -> [current_seq_len, current_seq_len]
-                                src_padding_mask=src_padding_mask.unsqueeze(0),  # src_padding_mask -> [1, seq_len]
-                                tgt_padding_mask=None  # No tgt_padding_mask needed
-                            )  # No padding mask for tgt
-
-                            # Get the predicted gaze (x, y, duration) for the current step
-                            predicted_gaze = gaze_step_output[:, -1, :]  # Get the last predicted step
-                            predicted_padding = padding_step_output[:, -1]  # Get the last predicted padding
-
-                        # Append the predicted gaze and padding to the output lists
-                        gaze_outputs.append(predicted_gaze)
-                        padding_outputs.append(predicted_padding)
-
-                        # Use the predicted gaze as the next input in the sequence
-                        tgt_input = torch.cat([tgt_input, predicted_gaze], dim=0)  # Append prediction
-
-                    # Concatenate all gaze outputs for the current input
-                    gaze_outputs = torch.cat(gaze_outputs, dim=0)
-                    padding_outputs = torch.cat(padding_outputs, dim=0)
-
-                    # the first padding_outputs is always 1, concate the rest with the padding_outputs shape
-                    padding_outputs = torch.cat([torch.tensor([1]).to(device), padding_outputs], dim=0)
-
-                    # Convert to numpy arrays
-                    gaze_outputs_np = gaze_outputs.cpu().numpy()
-                    targets_np = targets.cpu().numpy()
-                    masks_y_np = masks_y.cpu().numpy()
-
-                    # Reshape to 2D before inverse transforming
-                    gaze_outputs_reshaped = gaze_outputs_np.reshape(-1, output_dim)
-                    targets_reshaped = targets_np.reshape(-1, output_dim)
-
-                    # Inverse transform
-                    gaze_outputs_inv = scaler_y.inverse_transform(gaze_outputs_reshaped)
-                    targets_inv = scaler_y.inverse_transform(targets_reshaped)
-                    typing_data_inv = scaler_X.inverse_transform(inputs.cpu().numpy())
-
-                    # the first gaze could be on the first typing_data, use the same x and y
-                    # with 500 ms duration, concate the rest with the gaze_outputs shape
-                    gaze_outputs_inv = np.concatenate(
-                        [[[typing_data_inv[0][0], typing_data_inv[0][1], first_gaze_duration]], gaze_outputs_inv],
-                        axis=0)
-
-                    # Limit the prediction and target lengths to max_pred_len
-                    valid_gaze_outputs = gaze_outputs_inv[:max_pred_len]
-                    valid_targets = targets_inv[:max_pred_len]
-                    valid_masks_y_np = masks_y_np[:max_pred_len]
+                # Limit the prediction and target lengths to max_pred_len
+                valid_gaze_outputs = gaze_outputs_inv[:max_pred_len]
+                valid_targets = targets_inv[:max_pred_len]
+                valid_masks_y_np = masks_y_np[:max_pred_len]
 
                 # Use predicted padding instead of original mask
                 predicted_masks_y_np = (padding_outputs[:max_pred_len] > 0.5).cpu().numpy()
@@ -777,11 +530,9 @@ def video_generation(include_key, model_type='lstm', max_pred_len=32, loss_type=
 
                 # For visualization, the first duration of typing log is set to 300
                 typing_log.loc[typing_log.index[0], 'duration'] = 300
-                # video_producing(index[0], typing_log, gaze_log, model_type=model_type,
-                #                 data_use=data_use, amortized_inference=True, gaze_data_source='ground_truth')
 
                 video_producing(index[0], typing_log, valid_gaze_outputs, model_type=model_type,
-                                data_use=data_use, amortized_inference=True, gaze_data_source='predicted')
+                                data_use=data_use, amortized_inference=True, gaze_data_source=gaze_data_source)
         else:
             for inputs, targets, masks_x, masks_y, index, user_params in tqdm(test_loader):
                 # get the max trailtime in typing_data
@@ -840,63 +591,58 @@ def video_generation(include_key, model_type='lstm', max_pred_len=32, loss_type=
                 # For visualization, the first duration of typing log is set to 300
                 typing_log.loc[typing_log.index[0], 'duration'] = 300
 
-                # video_producing(index[0], typing_log, gaze_log, model_type=model_type,
-                #                 data_use=data_use, amortized_inference=True, gaze_data_source='ground_truth')
-
                 video_producing(index[0], typing_log, valid_gaze_outputs, model_type=model_type,
-                                data_use=data_use, amortized_inference=True, gaze_data_source='predicted')
+                                data_use=data_use, amortized_inference=True, gaze_data_source=gaze_data_source)
 
 
 def main():
     import argparse
 
-    # if osp.exists(video_output_dir):
-    #     shutil.rmtree(video_output_dir)
-    # os.makedirs(video_output_dir)
-
     parser = argparse.ArgumentParser(description="Visualize Typing Log and Gaze Movements")
-    parser.add_argument("--model_type", choices=["lstm", "transformer", "rnn", "deit"], default="transformer",
+    parser.add_argument("--model_type", choices=["transformer"], default="transformer",
                         help="Type of model to use for prediction")
-    parser.add_argument("--include_key", action="store_true", help="Include key in the input features", default=False)
     parser.add_argument("--max_pred_len", type=int, default=32, help="Maximum number of gaze data points to predict")
-    parser.add_argument("--loss_type", type=str, choices=['mse', 'multimatch'], default='multimatch',
+    parser.add_argument("--loss_type", type=str, choices=['combined'], default='combined',
                         help="Loss function to use for training")
-    parser.add_argument("--data_use", type=str, choices=['both', 'human', 'simulated'], default='both',
+    parser.add_argument("--data_use", type=str, choices=['both', 'human'], default='human',
                         help="Use human data, simulated data, or both")
     parser.add_argument("--fpath_header", type=str, default='final_distribute', help='File path header for data use')
-    parser.add_argument("--autoregressive", action="store_true", help="Use autoregressive model", default=False)
-    parser.add_argument("--amortized-inference", action="store_true", help="Use amortized inference", default=True)
-    parser.add_argument("--use_rl", action="store_true", help="Use RL", default=False)
-    parser.add_argument("--use_rl_pretrained", action="store_true", help="Use RL Pretrained", default=False)
+    parser.add_argument("--amortized-inference", action="store_true", help="Use amortized inference", default=False)
     parser.add_argument("--visualize_text", action="store_true", help="Visualize text", default=False)
     parser.add_argument("--visualize_user_params", action="store_true", help="Visualize user params", default=True)
-    parser.add_argument("--method", type=str, default='image', help='visualization method', choices=['video', 'image'])
+    parser.add_argument("--gaze_data_source", type=str, choices=['ground_truth', 'predicted'], default='predicted',
+                        help="Source of gaze data to visualize")
+    parser.add_argument("--method", type=str, default='video', help='visualization method', choices=['video', 'image'])
     args = parser.parse_args()
-    if args.use_rl:
-        args.autoregressive = True
     print("visualizing with model type: ", args.model_type)
     print("Visualizing with data use: ", args.data_use)
     print("Using amortized inference:", args.amortized_inference)
-    print("Using autoregressive model:", args.autoregressive)
-    print("Using RL model:", args.use_rl)
     if args.amortized_inference:
         sub_dir = "amortized_inference_" + args.model_type + "_" + args.data_use
     else:
         sub_dir = args.model_type + "_" + args.data_use
+
     global img_output_dir
     img_output_dir = osp.join(img_output_dir, sub_dir)
+
+    global video_output_dir
+    video_output_dir = osp.join(video_output_dir, sub_dir)
+
     if args.method == 'image':
         if osp.exists(img_output_dir):
             shutil.rmtree(img_output_dir)
         os.makedirs(img_output_dir)
+    elif args.method == 'video':
+        if osp.exists(video_output_dir):
+            shutil.rmtree(video_output_dir)
+        os.makedirs(video_output_dir)
+
     if args.method == 'image':
-        visualization(args.include_key, args.model_type, args.max_pred_len, args.loss_type, args.data_use,
-                      args.fpath_header, args.autoregressive, args.amortized_inference, args.use_rl,
-                      args.use_rl_pretrained, args.visualize_text, args.visualize_user_params)
+        visualization(args.model_type, args.max_pred_len, args.loss_type, args.data_use,
+                      args.fpath_header, args.amortized_inference, args.visualize_text, args.visualize_user_params)
     else:
-        video_generation(args.include_key, args.model_type, args.max_pred_len, args.loss_type, args.data_use,
-                         args.fpath_header, args.autoregressive, args.amortized_inference, args.use_rl,
-                         args.use_rl_pretrained)
+        video_generation(args.model_type, args.max_pred_len, args.loss_type, args.data_use,
+                         args.fpath_header, args.amortized_inference, args.gaze_data_source)
 
 
 def plot_and_save_trails(typing_data, gaze_data, output_dir, max_len=32, min_len=16):
@@ -1143,10 +889,3 @@ def video_producing(index, typing_data, gaze_log, screen_size=(1080, 1920), fps=
 
 if __name__ == "__main__":
     main()
-    # generate_color_legend(osp.join(GAZE_INFERENCE_DIR, 'figs', 'typing_log_color_legend.png'), color_map_typing_log)
-    # generate_color_legend(osp.join(GAZE_INFERENCE_DIR, 'figs', 'ground_truth_gaze_color_legend.png'),
-    #                       color_map_ground_truth_gaze)
-    # generate_color_legend(osp.join(GAZE_INFERENCE_DIR, 'figs', 'predicted_gaze_color_legend.png'),
-    #                       color_map_predicted_gaze)
-    # typing_data, gaze_data = load_human_data()  # Ensure you load the data here
-    # plot_and_save_trails(typing_data, gaze_data, 'figs')  # Update to your output directory
