@@ -1,0 +1,9 @@
+# no any __pycache__ folder
+
+*_pycache_*
+data/one_hand_gaze_data.csv
+data/one_hand_typinglog_data.csv
+.idea/
+log/
+tensorboard/
+amortized_inference/

@@ -1,0 +1,481 @@
+systime,id,block,sentence_n,trialtime,event,layout,message,touchx,touchy
+1536755414453,131,1,43,0,o,qwertyuiopåasdfghjklöäzxcvbnm,o,1127.4609,1693.75
+1536755414725,131,1,43,272,l,qwertyuiopåasdfghjklöäzxcvbnm,ol,1157.3438,2003.125
+1536755415310,131,1,43,857,e,qwertyuiopåasdfghjklöäzxcvbnm,ole,332.9297,1746.25
+1536755416032,131,1,43,1579,n,qwertyuiopåasdfghjklöäzxcvbnm,olen,954.1406,2186.875
+1536755416336,131,1,43,1883, ,qwertyuiopåasdfghjklöäzxcvbnm,olen ,737.22656,2536.25
+1536755416787,131,1,43,2334,l,qwertyuiopåasdfghjklöäzxcvbnm,olen l,1109.1797,2073.125
+1536755417063,131,1,43,2610,o,qwertyuiopåasdfghjklöäzxcvbnm,olen lo,1097.2266,1758.75
+1536755417315,131,1,43,2862,m,qwertyuiopåasdfghjklöäzxcvbnm,olen lom,1098.2812,2271.875
+1536755417837,131,1,43,3384,a,qwertyuiopåasdfghjklöäzxcvbnm,olen loma,105.82031,1936.25
+1536755418496,131,1,43,4043,l,qwertyuiopåasdfghjklöäzxcvbnm,olen lomal,1131.3281,2026.875
+1536755418664,131,1,43,4211,l,qwertyuiopåasdfghjklöäzxcvbnm,olen lomall,1087.3828,1993.75
+1536755419238,131,1,43,4785,a,qwertyuiopåasdfghjklöäzxcvbnm,olen lomalla,29.882812,2003.75
+1536755419920,131,1,43,5467, ,qwertyuiopåasdfghjklöäzxcvbnm,olen lomalla ,801.21094,2503.125
+1536755420488,131,1,43,6035,h,qwertyuiopåasdfghjklöäzxcvbnm,olen lomalla h,696.09375,2016.25
+1536755420820,131,1,43,6367,e,qwertyuiopåasdfghjklöäzxcvbnm,olen lomalla he,356.1328,1768.75
+1536755421517,131,1,43,7064,i,qwertyuiopåasdfghjklöäzxcvbnm,olen lomalla hei,1017.4219,1763.125
+1536755421931,131,1,43,7478,n,qwertyuiopåasdfghjklöäzxcvbnm,olen lomalla hein,933.39844,2231.25
+1536755422353,131,1,43,7900,ä,qwertyuiopåasdfghjklöäzxcvbnm,olen lomalla heinä,1403.4375,1990.0
+1536755422814,131,1,43,8361,k,qwertyuiopåasdfghjklöäzxcvbnm,olen lomalla heinäk,989.2969,2025.0
+1536755423113,131,1,43,8660,u,qwertyuiopåasdfghjklöäzxcvbnm,olen lomalla heinäku,842.34375,1751.875
+1536755423308,131,1,43,8855,u,qwertyuiopåasdfghjklöäzxcvbnm,olen lomalla heinäkuu,805.0781,1765.0
+1536755423675,131,1,43,9222,s,qwertyuiopåasdfghjklöäzxcvbnm,olen lomalla heinäkuus,209.88281,2011.875
+1536755423881,131,1,43,9428,s,qwertyuiopåasdfghjklöäzxcvbnm,olen lomalla heinäkuuss,202.85156,2041.875
+1536755424065,131,1,43,9612,a,qwertyuiopåasdfghjklöäzxcvbnm,olen lomalla heinäkuussa,67.85155999999999,2033.125
+1536755432478,131,1,5,0,k,qwertyuiopåasdfghjklöäzxcvbnm,k,959.41406,2023.75
+1536755432726,131,1,5,248,i,qwertyuiopåasdfghjklöäzxcvbnm,ki,971.3672,1791.25
+1536755433059,131,1,5,581,i,qwertyuiopåasdfghjklöäzxcvbnm,kii,971.3672,1741.25
+1536755433380,131,1,5,902,t,qwertyuiopåasdfghjklöäzxcvbnm,kiit,619.10156,1751.875
+1536755433809,131,1,5,1331,o,qwertyuiopåasdfghjklöäzxcvbnm,kiito,1122.1875,1791.25
+1536755434507,131,1,5,2029,s,qwertyuiopåasdfghjklöäzxcvbnm,kiitos,175.07811999999998,2001.875
+1536755435075,131,1,5,2597, ,qwertyuiopåasdfghjklöäzxcvbnm,kiitos ,725.27344,2466.875
+1536755435454,131,1,5,2976,v,qwertyuiopåasdfghjklöäzxcvbnm,kiitos v,738.28125,2255.0
+1536755435924,131,1,5,3446,a,qwertyuiopåasdfghjklöäzxcvbnm,kiitos va,91.75780999999999,2006.875
+1536755436188,131,1,5,3710,s,qwertyuiopåasdfghjklöäzxcvbnm,kiitos vas,217.96875,2026.25
+1536755436683,131,1,5,4205,t,qwertyuiopåasdfghjklöäzxcvbnm,kiitos vast,581.1328,1803.125
+1536755437080,131,1,5,4602,a,qwertyuiopåasdfghjklöäzxcvbnm,kiitos vasta,90.703125,2000.0
+1536755437622,131,1,5,5144,u,qwertyuiopåasdfghjklöäzxcvbnm,kiitos vastau,807.1875,1808.125
+1536755438101,131,1,5,5623,k,qwertyuiopåasdfghjklöäzxcvbnm,kiitos vastauk,983.3203,1991.875
+1536755438782,131,1,5,6304,s,qwertyuiopåasdfghjklöäzxcvbnm,kiitos vastauks,198.98438000000002,2016.25
+1536755439088,131,1,5,6610,e,qwertyuiopåasdfghjklöäzxcvbnm,kiitos vastaukse,338.90625,1751.875
+1536755439455,131,1,5,6977,s,qwertyuiopåasdfghjklöäzxcvbnm,kiitos vastaukses,158.90625,2058.75
+1536755439959,131,1,5,7481,t,qwertyuiopåasdfghjklöäzxcvbnm,kiitos vastauksest,600.1172,1766.875
+1536755440535,131,1,5,8057,a,qwertyuiopåasdfghjklöäzxcvbnm,kiitos vastauksesta,82.96875,1998.125
+1536755440880,131,1,5,8402,s,qwertyuiopåasdfghjklöäzxcvbnm,kiitos vastauksestas,207.77344,2008.125
+1536755441441,131,1,5,8963,i,qwertyuiopåasdfghjklöäzxcvbnm,kiitos vastauksestasi,986.1328,1785.0
+1536755449394,131,1,61,0,v,qwertyuiopåasdfghjklöäzxcvbnm,v,699.2578,2238.75
+1536755449798,131,1,61,404,o,qwertyuiopåasdfghjklöäzxcvbnm,vo,1123.2422,1776.25
+1536755450063,131,1,61,669,i,qwertyuiopåasdfghjklöäzxcvbnm,voi,1003.3594,1740.0
+1536755450281,131,1,61,887,k,qwertyuiopåasdfghjklöäzxcvbnm,voik,967.14844,2016.875
+1536755450510,131,1,61,1116,o,qwertyuiopåasdfghjklöäzxcvbnm,voiko,1121.4844,1725.0
+1536755450928,131,1,61,1534, ,qwertyuiopåasdfghjklöäzxcvbnm,voiko ,747.0703,2520.0
+1536755451460,131,1,61,2066,s,qwertyuiopåasdfghjklöäzxcvbnm,voiko s,208.82811999999998,1990.0
+1536755451887,131,1,61,2493,i,qwertyuiopåasdfghjklöäzxcvbnm,voiko si,1008.28125,1753.75
+1536755452174,131,1,61,2780,y,qwertyuiopåasdfghjklöäzxcvbnm,voiko siy,656.0156,1731.875
+1536755452721,131,1,61,3327,B,qwertyuiopåasdfghjklöäzxcvbnm,voiko si,1366.5234,2326.25
+1536755452892,131,1,61,3498,B,qwertyuiopåasdfghjklöäzxcvbnm,voiko s,1340.5078,2233.125
+1536755453315,131,1,61,3921,t,qwertyuiopåasdfghjklöäzxcvbnm,voiko st,569.1797,1795.0
+1536755453815,131,1,61,4421,ä,qwertyuiopåasdfghjklöäzxcvbnm,voiko stä,1381.2891,2003.125
+1536755454234,131,1,61,4840, ,qwertyuiopåasdfghjklöäzxcvbnm,voiko stä ,615.9375,2436.25
+1536755454801,131,1,61,5407,B,qwertyuiopåasdfghjklöäzxcvbnm,voiko stä,1335.5859,2208.125
+1536755454974,131,1,61,5580,B,qwertyuiopåasdfghjklöäzxcvbnm,voiko st,1316.25,2231.25
+1536755455111,131,1,61,5717,B,qwertyuiopåasdfghjklöäzxcvbnm,voiko s,1320.4688,2196.875
+1536755455810,131,1,61,6416,i,qwertyuiopåasdfghjklöäzxcvbnm,voiko si,973.125,1738.75
+1536755456172,131,1,61,6778,t,qwertyuiopåasdfghjklöäzxcvbnm,voiko sit,581.1328,1775.0
+1536755456807,131,1,61,7413,ä,qwertyuiopåasdfghjklöäzxcvbnm,voiko sitä,1369.3359,1996.25
+1536755457262,131,1,61,7868, ,qwertyuiopåasdfghjklöäzxcvbnm,voiko sitä ,728.08594,2436.875
+1536755457969,131,1,61,8575,e,qwertyuiopåasdfghjklöäzxcvbnm,voiko sitä e,299.8828,1788.125
+1536755458585,131,1,61,9191,n,qwertyuiopåasdfghjklöäzxcvbnm,voiko sitä en,982.2656,2256.25
+1536755458953,131,1,61,9559,ä,qwertyuiopåasdfghjklöäzxcvbnm,voiko sitä enä,1394.2969,2031.875
+1536755459137,131,1,61,9743,ä,qwertyuiopåasdfghjklöäzxcvbnm,voiko sitä enää,1367.5781,2015.0
+1536755459523,131,1,61,10129, ,qwertyuiopåasdfghjklöäzxcvbnm,voiko sitä enää ,759.02344,2436.875
+1536755459902,131,1,61,10508,k,qwertyuiopåasdfghjklöäzxcvbnm,voiko sitä enää k,991.40625,2056.25
+1536755460201,131,1,61,10807,o,qwertyuiopåasdfghjklöäzxcvbnm,voiko sitä enää ko,1111.2891,1803.125
+1536755460610,131,1,61,11216,r,qwertyuiopåasdfghjklöäzxcvbnm,voiko sitä enää kor,480.9375,1776.25
+1536755461028,131,1,61,11634,j,qwertyuiopåasdfghjklöäzxcvbnm,voiko sitä enää korj,857.1094,1983.125
+1536755461550,131,1,61,12156,a,qwertyuiopåasdfghjklöäzxcvbnm,voiko sitä enää korja,58.007812,1965.0
+1536755461960,131,1,61,12566,t,qwertyuiopåasdfghjklöäzxcvbnm,voiko sitä enää korjat,609.96094,1755.0
+1536755462328,131,1,61,12934,a,qwertyuiopåasdfghjklöäzxcvbnm,voiko sitä enää korjata,103.00780999999999,2028.75
+1536755469283,131,1,7,0,t,qwertyuiopåasdfghjklöäzxcvbnm,t,599.0625,1761.25
+1536755469833,131,1,7,550,ä,qwertyuiopåasdfghjklöäzxcvbnm,tä,1397.4609,2008.75
+1536755470189,131,1,7,906,m,qwertyuiopåasdfghjklöäzxcvbnm,täm,1095.4688,2243.75
+1536755470450,131,1,7,1167,ä,qwertyuiopåasdfghjklöäzxcvbnm,tämä,1363.3594,1956.875
+1536755470783,131,1,7,1500, ,qwertyuiopåasdfghjklöäzxcvbnm,tämä ,750.2344,2401.25
+1536755471214,131,1,7,1931,o,qwertyuiopåasdfghjklöäzxcvbnm,tämä o,1097.2266,1766.25
+1536755471535,131,1,7,2252,n,qwertyuiopåasdfghjklöäzxcvbnm,tämä on,1000.1953,2258.125
+1536755471772,131,1,7,2489, ,qwertyuiopåasdfghjklöäzxcvbnm,tämä on ,873.28125,2470.0
+1536755472128,131,1,7,2845,t,qwertyuiopåasdfghjklöäzxcvbnm,tämä on t,549.1406,1748.75
+1536755472508,131,1,7,3225,o,qwertyuiopåasdfghjklöäzxcvbnm,tämä on to,1126.4062,1746.875
+1536755473257,131,1,7,3974,d,qwertyuiopåasdfghjklöäzxcvbnm,tämä on tod,333.98438,2041.25
+1536755473454,131,1,7,4171,e,qwertyuiopåasdfghjklöäzxcvbnm,tämä on tode,354.02344,1731.25
+1536755473958,131,1,7,4675,l,qwertyuiopåasdfghjklöäzxcvbnm,tämä on todel,1114.4531,2046.25
+1536755474112,131,1,7,4829,l,qwertyuiopåasdfghjklöäzxcvbnm,tämä on todell,1124.2969,2028.75
+1536755474512,131,1,7,5229,a,qwertyuiopåasdfghjklöäzxcvbnm,tämä on todella,106.875,1965.0
+1536755475061,131,1,7,5778, ,qwertyuiopåasdfghjklöäzxcvbnm,tämä on todella ,746.0156,2516.875
+1536755475418,131,1,7,6135,h,qwertyuiopåasdfghjklöäzxcvbnm,tämä on todella h,740.03906,2081.875
+1536755475643,131,1,7,6360,y,qwertyuiopåasdfghjklöäzxcvbnm,tämä on todella hy,730.1953,1778.75
+1536755475892,131,1,7,6609,v,qwertyuiopåasdfghjklöäzxcvbnm,tämä on todella hyv,731.25,2248.75
+1536755476249,131,1,7,6966,ä,qwertyuiopåasdfghjklöäzxcvbnm,tämä on todella hyvä,1316.25,2043.75
+1536755484416,131,1,35,0,o,qwertyuiopåasdfghjklöäzxcvbnm,o,1096.1719,1756.875
+1536755484674,131,1,35,258,l,qwertyuiopåasdfghjklöäzxcvbnm,ol,1114.4531,2018.125
+1536755485144,131,1,35,728,e,qwertyuiopåasdfghjklöäzxcvbnm,ole,368.08594,1778.125
+1536755485758,131,1,35,1342,n,qwertyuiopåasdfghjklöäzxcvbnm,olen,1002.3047,2223.125
+1536755486064,131,1,35,1648, ,qwertyuiopåasdfghjklöäzxcvbnm,olen ,778.0078,2486.25
+1536755486445,131,1,35,2029,t,qwertyuiopåasdfghjklöäzxcvbnm,olen t,600.1172,1760.0
+1536755487040,131,1,35,2624,ö,qwertyuiopåasdfghjklöäzxcvbnm,olen tö,1242.4219,2033.75
+1536755487433,131,1,35,3017,i,qwertyuiopåasdfghjklöäzxcvbnm,olen töi,1011.4453,1776.25
+1536755487915,131,1,35,3499,s,qwertyuiopåasdfghjklöäzxcvbnm,olen töis,184.92188000000002,2001.875
+1536755488093,131,1,35,3677,s,qwertyuiopåasdfghjklöäzxcvbnm,olen töiss,194.76561999999998,2013.125
+1536755488642,131,1,35,4226,ä,qwertyuiopåasdfghjklöäzxcvbnm,olen töissä,1415.3906,2018.75
+1536755489108,131,1,35,4692, ,qwertyuiopåasdfghjklöäzxcvbnm,olen töissä ,646.1719,2470.0
+1536755489440,131,1,35,5024,h,qwertyuiopåasdfghjklöäzxcvbnm,olen töissä h,717.1875,2018.75
+1536755489690,131,1,35,5274,u,qwertyuiopåasdfghjklöäzxcvbnm,olen töissä hu,827.22656,1788.125
+1536755490064,131,1,35,5648,o,qwertyuiopåasdfghjklöäzxcvbnm,olen töissä huo,1139.4141,1736.25
+1536755490515,131,1,35,6099,m,qwertyuiopåasdfghjklöäzxcvbnm,olen töissä huom,1118.3203,2238.125
+1536755490969,131,1,35,6553,e,qwertyuiopåasdfghjklöäzxcvbnm,olen töissä huome,319.92188,1736.25
+1536755491595,131,1,35,7179,n,qwertyuiopåasdfghjklöäzxcvbnm,olen töissä huomen,1002.3047,2238.75
+1536755491759,131,1,35,7343,n,qwertyuiopåasdfghjklöäzxcvbnm,olen töissä huomenn,995.27344,2205.0
+1536755492210,131,1,35,7794,a,qwertyuiopåasdfghjklöäzxcvbnm,olen töissä huomenna,65.74219000000001,1960.0
+1536755499109,131,1,8,0,t,qwertyuiopåasdfghjklöäzxcvbnm,t,586.0547,1756.875
+1536755499649,131,1,8,540,ä,qwertyuiopåasdfghjklöäzxcvbnm,tä,1395.3516,2025.0
+1536755499946,131,1,8,837,m,qwertyuiopåasdfghjklöäzxcvbnm,täm,1082.4609,2238.75
+1536755500207,131,1,8,1098,ä,qwertyuiopåasdfghjklöäzxcvbnm,tämä,1417.5,1990.0
+1536755500516,131,1,8,1407, ,qwertyuiopåasdfghjklöäzxcvbnm,tämä ,740.03906,2428.125
+1536755501030,131,1,8,1921,o,qwertyuiopåasdfghjklöäzxcvbnm,tämä o,1096.1719,1766.25
+1536755501327,131,1,8,2218,n,qwertyuiopåasdfghjklöäzxcvbnm,tämä on,976.28906,2238.125
+1536755501588,131,1,8,2479, ,qwertyuiopåasdfghjklöäzxcvbnm,tämä on ,788.2031,2458.75
+1536755501979,131,1,8,2870,a,qwertyuiopåasdfghjklöäzxcvbnm,tämä on a,42.890625,1996.25
+1536755502348,131,1,8,3239,r,qwertyuiopåasdfghjklöäzxcvbnm,tämä on ar,499.92188,1775.0
+1536755503211,131,1,8,4102,k,qwertyuiopåasdfghjklöäzxcvbnm,tämä on ark,954.1406,2001.25
+1536755503661,131,1,8,4552,s,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arks,136.05469,1945.0
+1536755504197,131,1,8,5088,l,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arksl,1141.1719,2041.25
+1536755505091,131,1,8,5982,B,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arks,1345.4297,2240.0
+1536755505229,131,1,8,6120,B,qwertyuiopåasdfghjklöäzxcvbnm,tämä on ark,1329.2578,2196.25
+1536755505974,131,1,8,6865,a,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arka,80.859375,1990.0
+1536755506599,131,1,8,7490,l,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arkal,1143.2812,2035.0
+1536755506881,131,1,8,7772,u,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arkalu,869.0625,1816.875
+1536755507106,131,1,8,7997,o,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arkaluo,1122.1875,1741.25
+1536755507391,131,1,8,8282,m,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arkaluom,1048.3594,2201.25
+1536755508343,131,1,8,9234,B,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arkaluo,1324.3359,2236.25
+1536755508730,131,1,8,9621,n,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arkaluon,991.40625,2218.75
+1536755509110,131,1,8,10001,t,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arkaluont,589.9219,1761.25
+1536755509549,131,1,8,10440,o,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arkaluonto,1101.4453,1800.0
+1536755509786,131,1,8,10677,i,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arkaluontoi,965.3906,1803.125
+1536755510402,131,1,8,11293,s,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arkaluontois,207.07031,2006.25
+1536755510802,131,1,8,11693,t,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arkaluontoist,598.0078,1785.0
+1536755511087,131,1,8,11978,a,qwertyuiopåasdfghjklöäzxcvbnm,tämä on arkaluontoista,45.0,2068.125
+1536755518493,131,1,14,0,p,qwertyuiopåasdfghjklöäzxcvbnm,p,1266.3281,1821.875
+1536755518856,131,1,14,363,ä,qwertyuiopåasdfghjklöäzxcvbnm,pä,1394.2969,2038.125
+1536755518998,131,1,14,505,ä,qwertyuiopåasdfghjklöäzxcvbnm,pää,1380.5859,2020.0
+1536755519643,131,1,14,1150,s,qwertyuiopåasdfghjklöäzxcvbnm,pääs,156.79688000000002,2033.75
+1536755519913,131,1,14,1420,e,qwertyuiopåasdfghjklöäzxcvbnm,pääse,324.14062,1720.0
+1536755520622,131,1,14,2129,n,qwertyuiopåasdfghjklöäzxcvbnm,pääsen,1014.2578,2225.0
+1536755520855,131,1,14,2362, ,qwertyuiopåasdfghjklöäzxcvbnm,pääsen ,880.3125,2446.25
+1536755521297,131,1,14,2804,p,qwertyuiopåasdfghjklöäzxcvbnm,pääsen p,1246.2891,1761.875
+1536755521811,131,1,14,3318,e,qwertyuiopåasdfghjklöäzxcvbnm,pääsen pe,304.10156,1793.75
+1536755522049,131,1,14,3556,r,qwertyuiopåasdfghjklöäzxcvbnm,pääsen per,426.09375,1773.125
+1536755522621,131,1,14,4128,i,qwertyuiopåasdfghjklöäzxcvbnm,pääsen peri,986.1328,1803.75
+1536755522835,131,1,14,4342,l,qwertyuiopåasdfghjklöäzxcvbnm,pääsen peril,1066.2891,1998.75
+1536755523002,131,1,14,4509,l,qwertyuiopåasdfghjklöäzxcvbnm,pääsen perill,1073.3203,1961.25
+1536755523369,131,1,14,4876,e,qwertyuiopåasdfghjklöäzxcvbnm,pääsen perille,391.9922,1775.0
+1536755523912,131,1,14,5419, ,qwertyuiopåasdfghjklöäzxcvbnm,pääsen perille ,690.1172,2446.25
+1536755524324,131,1,14,5831,t,qwertyuiopåasdfghjklöäzxcvbnm,pääsen perille t,600.1172,1826.25
+1536755524597,131,1,14,6104,u,qwertyuiopåasdfghjklöäzxcvbnm,pääsen perille tu,830.03906,1780.0
+1536755525009,131,1,14,6516,n,qwertyuiopåasdfghjklöäzxcvbnm,pääsen perille tun,952.3828,2245.0
+1536755525164,131,1,14,6671,n,qwertyuiopåasdfghjklöäzxcvbnm,pääsen perille tunn,968.2031,2210.0
+1536755525414,131,1,14,6921,i,qwertyuiopåasdfghjklöäzxcvbnm,pääsen perille tunni,932.34375,1803.75
+1536755525815,131,1,14,7322,s,qwertyuiopåasdfghjklöäzxcvbnm,pääsen perille tunnis,222.89062,2021.25
+1536755525993,131,1,14,7500,s,qwertyuiopåasdfghjklöäzxcvbnm,pääsen perille tunniss,182.8125,2023.125
+1536755526147,131,1,14,7654,a,qwertyuiopåasdfghjklöäzxcvbnm,pääsen perille tunnissa,45.0,1998.125
+1536755534451,131,1,6,0,t,qwertyuiopåasdfghjklöäzxcvbnm,t,587.1094,1818.75
+1536755534733,131,1,6,282,u,qwertyuiopåasdfghjklöäzxcvbnm,tu,854.2969,1813.125
+1536755535017,131,1,6,566,o,qwertyuiopåasdfghjklöäzxcvbnm,tuo,1148.2031,1741.25
+1536755535438,131,1,6,987, ,qwertyuiopåasdfghjklöäzxcvbnm,tuo ,800.15625,2456.25
+1536755535724,131,1,6,1273,ö,qwertyuiopåasdfghjklöäzxcvbnm,tuo ö,1193.2031,2013.125
+1536755535997,131,1,6,1546,o,qwertyuiopåasdfghjklöäzxcvbnm,tuo öo,1057.1484,1798.75
+1536755536329,131,1,6,1878,e,qwertyuiopåasdfghjklöäzxcvbnm,tuo öoe,357.89062,1746.875
+1536755537077,131,1,6,2626,B,qwertyuiopåasdfghjklöäzxcvbnm,tuo öo,1347.5391,2248.125
+1536755537239,131,1,6,2788,B,qwertyuiopåasdfghjklöäzxcvbnm,tuo ö,1315.5469,2201.875
+1536755537381,131,1,6,2930,B,qwertyuiopåasdfghjklöäzxcvbnm,tuo ,1311.3281,2200.0
+1536755538200,131,1,6,3749,l,qwertyuiopåasdfghjklöäzxcvbnm,tuo l,1166.4844,2003.75
+1536755538492,131,1,6,4041,o,qwertyuiopåasdfghjklöäzxcvbnm,tuo lo,1053.2812,1801.25
+1536755538872,131,1,6,4421,e,qwertyuiopåasdfghjklöäzxcvbnm,tuo loe,352.96875,1738.125
+1536755539478,131,1,6,5027,n,qwertyuiopåasdfghjklöäzxcvbnm,tuo loen,965.3906,2228.75
+1536755539939,131,1,6,5488,e,qwertyuiopåasdfghjklöäzxcvbnm,tuo loene,350.85938,1726.25
+1536755540092,131,1,6,5641,e,qwertyuiopåasdfghjklöäzxcvbnm,tuo loenee,324.84375,1760.0
+1536755541053,131,1,6,6602,B,qwertyuiopåasdfghjklöäzxcvbnm,tuo loene,1310.2734,2225.0
+1536755541205,131,1,6,6754,B,qwertyuiopåasdfghjklöäzxcvbnm,tuo loen,1309.5703,2203.125
+1536755541383,131,1,6,6932,B,qwertyuiopåasdfghjklöäzxcvbnm,tuo loe,1298.3203,2213.125
+1536755541538,131,1,6,7087,B,qwertyuiopåasdfghjklöäzxcvbnm,tuo lo,1311.3281,2206.25
+1536755541859,131,1,6,7408,B,qwertyuiopåasdfghjklöäzxcvbnm,tuo l,1326.4453,2188.75
+1536755542585,131,1,6,8134,i,qwertyuiopåasdfghjklöäzxcvbnm,tuo li,1009.33594,1810.0
+1536755543074,131,1,6,8623,e,qwertyuiopåasdfghjklöäzxcvbnm,tuo lie,332.9297,1771.25
+1536755543720,131,1,6,9269,n,qwertyuiopåasdfghjklöäzxcvbnm,tuo lien,982.2656,2241.25
+1536755544522,131,1,6,10071,e,qwertyuiopåasdfghjklöäzxcvbnm,tuo liene,362.8125,1815.0
+1536755544683,131,1,6,10232,e,qwertyuiopåasdfghjklöäzxcvbnm,tuo lienee,333.98438,1798.125
+1536755545047,131,1,6,10596, ,qwertyuiopåasdfghjklöäzxcvbnm,tuo lienee ,685.1953,2463.125
+1536755545519,131,1,6,11068,o,qwertyuiopåasdfghjklöäzxcvbnm,tuo lienee o,1106.3672,1818.125
+1536755545756,131,1,6,11305,i,qwertyuiopåasdfghjklöäzxcvbnm,tuo lienee oi,986.1328,1791.875
+1536755545946,131,1,6,11495,k,qwertyuiopåasdfghjklöäzxcvbnm,tuo lienee oik,960.1172,1978.125
+1536755546400,131,1,6,11949,e,qwertyuiopåasdfghjklöäzxcvbnm,tuo lienee oike,336.09375,1773.75
+1536755546662,131,1,6,12211,a,qwertyuiopåasdfghjklöäzxcvbnm,tuo lienee oikea,40.78125,2053.75
+1536755547213,131,1,6,12762, ,qwertyuiopåasdfghjklöäzxcvbnm,tuo lienee oikea ,751.28906,2465.0
+1536755547462,131,1,6,13011,v,qwertyuiopåasdfghjklöäzxcvbnm,tuo lienee oikea v,763.2422,2203.125
+1536755547843,131,1,6,13392,a,qwertyuiopåasdfghjklöäzxcvbnm,tuo lienee oikea va,69.96094000000001,1988.125
+1536755548033,131,1,6,13582,s,qwertyuiopåasdfghjklöäzxcvbnm,tuo lienee oikea vas,175.78125,2026.875
+1536755548402,131,1,6,13951,t,qwertyuiopåasdfghjklöäzxcvbnm,tuo lienee oikea vast,587.1094,1793.125
+1536755548698,131,1,6,14247,a,qwertyuiopåasdfghjklöäzxcvbnm,tuo lienee oikea vasta,77.69530999999999,2018.75
+1536755549377,131,1,6,14926,u,qwertyuiopåasdfghjklöäzxcvbnm,tuo lienee oikea vastau,840.2344,1758.125
+1536755549774,131,1,6,15323,s,qwertyuiopåasdfghjklöäzxcvbnm,tuo lienee oikea vastaus,232.03125,1985.0
+1536755557159,131,1,26,0,o,qwertyuiopåasdfghjklöäzxcvbnm,o,1104.2578,1793.75
+1536755557627,131,1,26,468,s,qwertyuiopåasdfghjklöäzxcvbnm,os,246.09375,2026.25
+1536755558078,131,1,26,919,t,qwertyuiopåasdfghjklöäzxcvbnm,ost,583.2422,1780.0
+1536755558498,131,1,26,1339,i,qwertyuiopåasdfghjklöäzxcvbnm,osti,951.3281,1768.75
+1536755558771,131,1,26,1612,t,qwertyuiopåasdfghjklöäzxcvbnm,ostit,582.1875,1786.25
+1536755559413,131,1,26,2254,k,qwertyuiopåasdfghjklöäzxcvbnm,ostitk,1047.3047,2011.25
+1536755559613,131,1,26,2454,o,qwertyuiopåasdfghjklöäzxcvbnm,ostitko,1048.3594,1783.75
+1536755560042,131,1,26,2883, ,qwertyuiopåasdfghjklöäzxcvbnm,ostitko ,645.1172,2545.0
+1536755560639,131,1,26,3480,m,qwertyuiopåasdfghjklöäzxcvbnm,ostitko m,1141.1719,2250.0
+1536755561144,131,1,26,3985,e,qwertyuiopåasdfghjklöäzxcvbnm,ostitko me,324.84375,1771.25
+1536755561615,131,1,26,4456,i,qwertyuiopåasdfghjklöäzxcvbnm,ostitko mei,992.1094,1776.875
+1536755561912,131,1,26,4753,l,qwertyuiopåasdfghjklöäzxcvbnm,ostitko meil,1114.4531,1990.0
+1536755562054,131,1,26,4895,l,qwertyuiopåasdfghjklöäzxcvbnm,ostitko meill,1106.3672,1961.25
+1536755562424,131,1,26,5265,e,qwertyuiopåasdfghjklöäzxcvbnm,ostitko meille,350.85938,1753.125
+1536755562926,131,1,26,5767, ,qwertyuiopåasdfghjklöäzxcvbnm,ostitko meille ,815.27344,2438.75
+1536755563334,131,1,26,6175,l,qwertyuiopåasdfghjklöäzxcvbnm,ostitko meille l,1152.4219,2031.25
+1536755563583,131,1,26,6424,i,qwertyuiopåasdfghjklöäzxcvbnm,ostitko meille li,980.15625,1786.875
+1536755563749,131,1,26,6590,p,qwertyuiopåasdfghjklöäzxcvbnm,ostitko meille lip,1215.3516,1776.875
+1536755564887,131,1,26,7728,u,qwertyuiopåasdfghjklöäzxcvbnm,ostitko meille lipu,854.2969,1756.875
+1536755565132,131,1,26,7973,t,qwertyuiopåasdfghjklöäzxcvbnm,ostitko meille liput,588.16406,1773.75
+1536755572057,131,1,64,0,n,qwertyuiopåasdfghjklöäzxcvbnm,n,1031.1328,2213.75
+1536755572339,131,1,64,282,ä,qwertyuiopåasdfghjklöäzxcvbnm,nä,1414.3359,1973.125
+1536755572717,131,1,64,660,i,qwertyuiopåasdfghjklöäzxcvbnm,näi,1045.1953,1771.25
+1536755573037,131,1,64,980,t,qwertyuiopåasdfghjklöäzxcvbnm,näit,615.2344,1796.875
+1536755573505,131,1,64,1448,k,qwertyuiopåasdfghjklöäzxcvbnm,näitk,984.375,2056.25
+1536755573730,131,1,64,1673,ö,qwertyuiopåasdfghjklöäzxcvbnm,näitkö,1259.2969,1991.25
+1536755574074,131,1,64,2017, ,qwertyuiopåasdfghjklöäzxcvbnm,näitkö ,628.9453,2445.0
+1536755574634,131,1,64,2577,m,qwertyuiopåasdfghjklöäzxcvbnm,näitkö m,1145.3906,2233.125
+1536755574896,131,1,64,2839,i,qwertyuiopåasdfghjklöäzxcvbnm,näitkö mi,1001.25,1813.125
+1536755575109,131,1,64,3052,n,qwertyuiopåasdfghjklöäzxcvbnm,näitkö min,1018.125,2223.125
+1536755575383,131,1,64,3326,u,qwertyuiopåasdfghjklöäzxcvbnm,näitkö minu,861.3281,1833.125
+1536755575632,131,1,64,3575,n,qwertyuiopåasdfghjklöäzxcvbnm,näitkö minun,1016.3672,2285.0
+1536755575941,131,1,64,3884, ,qwertyuiopåasdfghjklöäzxcvbnm,näitkö minun ,688.0078,2531.25
+1536755576356,131,1,64,4299,v,qwertyuiopåasdfghjklöäzxcvbnm,näitkö minun v,693.28125,2201.25
+1536755576700,131,1,64,4643,i,qwertyuiopåasdfghjklöäzxcvbnm,näitkö minun vi,1009.33594,1751.875
+1536755577364,131,1,64,5307,e,qwertyuiopåasdfghjklöäzxcvbnm,näitkö minun vie,320.97656,1723.75
+1536755577550,131,1,64,5493,s,qwertyuiopåasdfghjklöäzxcvbnm,näitkö minun vies,213.75,1925.0
+1536755577895,131,1,64,5838,t,qwertyuiopåasdfghjklöäzxcvbnm,näitkö minun viest,568.125,1768.125
+1536755578294,131,1,64,6237,i,qwertyuiopåasdfghjklöäzxcvbnm,näitkö minun viesti,990.35156,1741.25
+1536755578508,131,1,64,6451,n,qwertyuiopåasdfghjklöäzxcvbnm,näitkö minun viestin,980.15625,2165.0
+1536755578781,131,1,64,6724,i,qwertyuiopåasdfghjklöäzxcvbnm,näitkö minun viestini,971.3672,1803.125
+1536755604133,131,1,25,0,h,qwertyuiopåasdfghjklöäzxcvbnm,h,745.3125,1925.0
+1536755604485,131,1,25,352,s,qwertyuiopåasdfghjklöäzxcvbnm,hs,159.96094,1951.25
+1536755606017,131,1,25,1884,a,qwertyuiopåasdfghjklöäzxcvbnm,ha,25.664062,2010.0
+1536755606602,131,1,25,2469,l,qwertyuiopåasdfghjklöäzxcvbnm,hal,1105.3125,2015.0
+1536755606910,131,1,25,2777,i,qwertyuiopåasdfghjklöäzxcvbnm,hali,918.28125,1776.875
+1536755607819,131,1,25,3686,B,qwertyuiopåasdfghjklöäzxcvbnm,hal,1356.3281,2245.0
+1536755608268,131,1,25,4135,u,qwertyuiopåasdfghjklöäzxcvbnm,halu,839.1797,1766.875
+1536755608820,131,1,25,4687,s,qwertyuiopåasdfghjklöäzxcvbnm,halus,193.00781,2036.25
+1536755609468,131,1,25,5335,i,qwertyuiopåasdfghjklöäzxcvbnm,halusi,978.39844,1781.875
+1536755609832,131,1,25,5699,n,qwertyuiopåasdfghjklöäzxcvbnm,halusin,941.1328,2236.875
+1536755610201,131,1,25,6068, ,qwertyuiopåasdfghjklöäzxcvbnm,halusin ,735.1172,2446.875
+1536755610661,131,1,25,6528,v,qwertyuiopåasdfghjklöäzxcvbnm,halusin v,722.1094,2258.125
+1536755611067,131,1,25,6934,a,qwertyuiopåasdfghjklöäzxcvbnm,halusin va,91.75780999999999,1955.0
+1536755611590,131,1,25,7457,i,qwertyuiopåasdfghjklöäzxcvbnm,halusin vai,974.1797,1800.0
+1536755611959,131,1,25,7826,n,qwertyuiopåasdfghjklöäzxcvbnm,halusin vain,973.125,2278.125
+1536755612245,131,1,25,8112, ,qwertyuiopåasdfghjklöäzxcvbnm,halusin vain ,665.15625,2483.125
+1536755612764,131,1,25,8631,t,qwertyuiopåasdfghjklöäzxcvbnm,halusin vain t,596.25,1778.75
+1536755613096,131,1,25,8963,a,qwertyuiopåasdfghjklöäzxcvbnm,halusin vain ta,75.9375,1968.75
+1536755613523,131,1,25,9390,r,qwertyuiopåasdfghjklöäzxcvbnm,halusin vain tar,505.1953,1788.75
+1536755614055,131,1,25,9922,k,qwertyuiopåasdfghjklöäzxcvbnm,halusin vain tark,1001.25,2058.75
+1536755614257,131,1,25,10124,i,qwertyuiopåasdfghjklöäzxcvbnm,halusin vain tarki,1000.1953,1790.0
+1536755614724,131,1,25,10591,s,qwertyuiopåasdfghjklöäzxcvbnm,halusin vain tarkis,236.95312,1993.125
+1536755615105,131,1,25,10972,y,qwertyuiopåasdfghjklöäzxcvbnm,halusin vain tarkisy,676.0547,1756.875
+1536755616039,131,1,25,11906,B,qwertyuiopåasdfghjklöäzxcvbnm,halusin vain tarkis,1333.4766,2221.25
+1536755616520,131,1,25,12387,t,qwertyuiopåasdfghjklöäzxcvbnm,halusin vain tarkist,586.0547,1755.0
+1536755616912,131,1,25,12779,a,qwertyuiopåasdfghjklöäzxcvbnm,halusin vain tarkista,52.734375,2005.0
+1536755617067,131,1,25,12934,a,qwertyuiopåasdfghjklöäzxcvbnm,halusin vain tarkistaa,64.6875,1991.875
+1536755623697,131,1,49,0,e,qwertyuiopåasdfghjklöäzxcvbnm,e,319.92188,1761.25
+1536755624290,131,1,49,593,n,qwertyuiopåasdfghjklöäzxcvbnm,en,976.28906,2253.125
+1536755624599,131,1,49,902, ,qwertyuiopåasdfghjklöäzxcvbnm,en ,678.16406,2461.25
+1536755624998,131,1,49,1301,t,qwertyuiopåasdfghjklöäzxcvbnm,en t,609.2578,1808.125
+1536755625366,131,1,49,1669,a,qwertyuiopåasdfghjklöäzxcvbnm,en ta,41.835938,1981.25
+1536755625768,131,1,49,2071,r,qwertyuiopåasdfghjklöäzxcvbnm,en tar,464.0625,1745.0
+1536755626488,131,1,49,2791,v,qwertyuiopåasdfghjklöäzxcvbnm,en tarv,702.0703,2270.0
+1536755626794,131,1,49,3097,i,qwertyuiopåasdfghjklöäzxcvbnm,en tarvi,992.1094,1781.25
+1536755627186,131,1,49,3489,t,qwertyuiopåasdfghjklöäzxcvbnm,en tarvit,654.2578,1740.0
+1536755628280,131,1,49,4583,s,qwertyuiopåasdfghjklöäzxcvbnm,en tarvits,220.78125,1953.75
+1536755628492,131,1,49,4795,e,qwertyuiopåasdfghjklöäzxcvbnm,en tarvitse,330.1172,1743.75
+1536755629033,131,1,49,5336, ,qwertyuiopåasdfghjklöäzxcvbnm,en tarvitse ,768.16406,2455.0
+1536755629496,131,1,49,5799,ö,qwertyuiopåasdfghjklöäzxcvbnm,en tarvitse ö,1183.3594,2040.0
+1536755630661,131,1,49,6964,B,qwertyuiopåasdfghjklöäzxcvbnm,en tarvitse ,1330.3125,2235.0
+1536755630967,131,1,49,7270,l,qwertyuiopåasdfghjklöäzxcvbnm,en tarvitse l,1143.2812,2018.125
+1536755631523,131,1,49,7826,a,qwertyuiopåasdfghjklöäzxcvbnm,en tarvitse la,52.734375,2013.75
+1536755632184,131,1,49,8487,h,qwertyuiopåasdfghjklöäzxcvbnm,en tarvitse lah,751.28906,2021.25
+1536755632416,131,1,49,8719,j,qwertyuiopåasdfghjklöäzxcvbnm,en tarvitse lahj,839.1797,2003.125
+1536755632761,131,1,49,9064,o,qwertyuiopåasdfghjklöäzxcvbnm,en tarvitse lahjo,1067.3438,1771.25
+1536755633058,131,1,49,9361,j,qwertyuiopåasdfghjklöäzxcvbnm,en tarvitse lahjoj,810.35156,2053.125
+1536755633530,131,1,49,9833,a,qwertyuiopåasdfghjklöäzxcvbnm,en tarvitse lahjoja,17.929688,2066.25
+1536755639980,131,1,27,0,k,qwertyuiopåasdfghjklöäzxcvbnm,k,964.33594,2033.125
+1536755640250,131,1,27,270,o,qwertyuiopåasdfghjklöäzxcvbnm,ko,1124.2969,1763.75
+1536755640499,131,1,27,519,k,qwertyuiopåasdfghjklöäzxcvbnm,kok,979.10156,2021.25
+1536755640979,131,1,27,999,e,qwertyuiopåasdfghjklöäzxcvbnm,koke,341.01562,1776.25
+1536755641478,131,1,27,1498,i,qwertyuiopåasdfghjklöäzxcvbnm,kokei,978.39844,1758.125
+1536755641740,131,1,27,1760,l,qwertyuiopåasdfghjklöäzxcvbnm,kokeil,1124.2969,1978.125
+1536755642120,131,1,27,2140,r,qwertyuiopåasdfghjklöäzxcvbnm,kokeilr,394.10156,1741.875
+1536755642942,131,1,27,2962,B,qwertyuiopåasdfghjklöäzxcvbnm,kokeil,1351.4062,2261.25
+1536755643427,131,1,27,3447,e,qwertyuiopåasdfghjklöäzxcvbnm,kokeile,350.85938,1781.875
+1536755644000,131,1,27,4020,n,qwertyuiopåasdfghjklöäzxcvbnm,kokeilen,991.40625,2238.75
+1536755644297,131,1,27,4317, ,qwertyuiopåasdfghjklöäzxcvbnm,kokeilen ,714.02344,2440.0
+1536755644840,131,1,27,4860,u,qwertyuiopåasdfghjklöäzxcvbnm,kokeilen u,840.2344,1771.25
+1536755645019,131,1,27,5039,u,qwertyuiopåasdfghjklöäzxcvbnm,kokeilen uu,840.2344,1773.75
+1536755645351,131,1,27,5371,d,qwertyuiopåasdfghjklöäzxcvbnm,kokeilen uud,336.09375,2035.0
+1536755645600,131,1,27,5620,e,qwertyuiopåasdfghjklöäzxcvbnm,kokeilen uude,324.84375,1790.0
+1536755645790,131,1,27,5810,s,qwertyuiopåasdfghjklöäzxcvbnm,kokeilen uudes,226.75781,1968.125
+1536755646171,131,1,27,6191,t,qwertyuiopåasdfghjklöäzxcvbnm,kokeilen uudest,585.0,1771.875
+1536755646468,131,1,27,6488,s,qwertyuiopåasdfghjklöäzxcvbnm,kokeilen uudests,136.05469,2003.125
+1536755646646,131,1,27,6666,a,qwertyuiopåasdfghjklöäzxcvbnm,kokeilen uudestsa,124.80469,1991.875
+1536755647362,131,1,27,7382,B,qwertyuiopåasdfghjklöäzxcvbnm,kokeilen uudests,1308.5156,2256.25
+1536755647503,131,1,27,7523,B,qwertyuiopåasdfghjklöäzxcvbnm,kokeilen uudest,1293.3984,2198.75
+1536755648062,131,1,27,8082,a,qwertyuiopåasdfghjklöäzxcvbnm,kokeilen uudesta,40.78125,2033.75
+1536755648240,131,1,27,8260,a,qwertyuiopåasdfghjklöäzxcvbnm,kokeilen uudestaa,37.96875,1998.125
+1536755648849,131,1,27,8869,n,qwertyuiopåasdfghjklöäzxcvbnm,kokeilen uudestaan,1002.3047,2256.25
+1536755655505,131,1,71,0,e,qwertyuiopåasdfghjklöäzxcvbnm,e,364.92188,1735.0
+1536755656051,131,1,71,546,i,qwertyuiopåasdfghjklöäzxcvbnm,ei,939.375,1795.0
+1536755656541,131,1,71,1036, ,qwertyuiopåasdfghjklöäzxcvbnm,ei ,750.2344,2423.125
+1536755656973,131,1,71,1468,o,qwertyuiopåasdfghjklöäzxcvbnm,ei o,1110.2344,1773.75
+1536755657364,131,1,71,1859,l,qwertyuiopåasdfghjklöäzxcvbnm,ei ol,1081.4062,1966.875
+1536755657826,131,1,71,2321,u,qwertyuiopåasdfghjklöäzxcvbnm,ei olu,815.27344,1811.875
+1536755658451,131,1,71,2946,B,qwertyuiopåasdfghjklöäzxcvbnm,ei ol,1347.5391,2250.0
+1536755658832,131,1,71,3327,l,qwertyuiopåasdfghjklöäzxcvbnm,ei oll,1094.4141,2025.0
+1536755659189,131,1,71,3684,u,qwertyuiopåasdfghjklöäzxcvbnm,ei ollu,854.2969,1768.125
+1536755659487,131,1,71,3982,t,qwertyuiopåasdfghjklöäzxcvbnm,ei ollut,621.21094,1758.125
+1536755659998,131,1,71,4493, ,qwertyuiopåasdfghjklöäzxcvbnm,ei ollut ,719.2969,2433.125
+1536755660429,131,1,71,4924,e,qwertyuiopåasdfghjklöäzxcvbnm,ei ollut e,333.98438,1748.75
+1536755660655,131,1,71,5150,d,qwertyuiopåasdfghjklöäzxcvbnm,ei ollut ed,294.96094,2035.0
+1536755660881,131,1,71,5376,e,qwertyuiopåasdfghjklöäzxcvbnm,ei ollut ede,319.92188,1765.0
+1536755661082,131,1,71,5577,s,qwertyuiopåasdfghjklöäzxcvbnm,ei ollut edes,153.98438000000002,2016.875
+1536755661715,131,1,71,6210, ,qwertyuiopåasdfghjklöäzxcvbnm,ei ollut edes ,798.0469,2435.0
+1536755662121,131,1,71,6616,l,qwertyuiopåasdfghjklöäzxcvbnm,ei ollut edes l,1140.4688,2023.125
+1536755662382,131,1,71,6877,ä,qwertyuiopåasdfghjklöäzxcvbnm,ei ollut edes lä,1340.5078,2051.25
+1536755662847,131,1,71,7342,h,qwertyuiopåasdfghjklöäzxcvbnm,ei ollut edes läh,721.0547,2031.875
+1536755663270,131,1,71,7765,e,qwertyuiopåasdfghjklöäzxcvbnm,ei ollut edes lähe,351.91406,1748.75
+1536755663922,131,1,71,8417,l,qwertyuiopåasdfghjklöäzxcvbnm,ei ollut edes lähel,1134.4922,2036.25
+1536755664074,131,1,71,8569,l,qwertyuiopåasdfghjklöäzxcvbnm,ei ollut edes lähell,1120.4297,1996.25
+1536755664288,131,1,71,8783,ä,qwertyuiopåasdfghjklöäzxcvbnm,ei ollut edes lähellä,1395.3516,2045.0
+1536755670423,131,1,66,0,m,qwertyuiopåasdfghjklöäzxcvbnm,m,1118.3203,2248.125
+1536755670812,131,1,66,389,i,qwertyuiopåasdfghjklöäzxcvbnm,mi,931.28906,1733.75
+1536755671050,131,1,66,627,t,qwertyuiopåasdfghjklöäzxcvbnm,mit,557.9297,1823.75
+1536755671383,131,1,66,960,ä,qwertyuiopåasdfghjklöäzxcvbnm,mitä,1406.6016,1951.875
+1536755671739,131,1,66,1316, ,qwertyuiopåasdfghjklöäzxcvbnm,mitä ,654.2578,2446.25
+1536755672269,131,1,66,1846,s,qwertyuiopåasdfghjklöäzxcvbnm,mitä s,211.99219,1983.125
+1536755672697,131,1,66,2274,i,qwertyuiopåasdfghjklöäzxcvbnm,mitä si,938.3203,1768.125
+1536755673053,131,1,66,2630,n,qwertyuiopåasdfghjklöäzxcvbnm,mitä sin,998.4375,2266.875
+1536755673386,131,1,66,2963,ä,qwertyuiopåasdfghjklöäzxcvbnm,mitä sinä,1397.4609,1951.875
+1536755673707,131,1,66,3284, ,qwertyuiopåasdfghjklöäzxcvbnm,mitä sinä ,630.0,2441.25
+1536755674190,131,1,66,3767,l,qwertyuiopåasdfghjklöäzxcvbnm,mitä sinä l,1129.2188,2028.75
+1536755674511,131,1,66,4088,u,qwertyuiopåasdfghjklöäzxcvbnm,mitä sinä lu,818.08594,1808.75
+1536755674677,131,1,66,4254,u,qwertyuiopåasdfghjklöäzxcvbnm,mitä sinä luu,803.3203,1793.125
+1536755674939,131,1,66,4516,l,qwertyuiopåasdfghjklöäzxcvbnm,mitä sinä luul,1102.1484,2090.0
+1536755675417,131,1,66,4994,e,qwertyuiopåasdfghjklöäzxcvbnm,mitä sinä luule,324.14062,1813.125
+1536755675642,131,1,66,5219,t,qwertyuiopåasdfghjklöäzxcvbnm,mitä sinä luulet,556.1719,1776.875
+1536755683049,131,1,69,0,v,qwertyuiopåasdfghjklöäzxcvbnm,v,692.22656,2271.25
+1536755683439,131,1,69,390,o,qwertyuiopåasdfghjklöäzxcvbnm,vo,1127.4609,1751.875
+1536755683653,131,1,69,604,i,qwertyuiopåasdfghjklöäzxcvbnm,voi,1000.1953,1751.875
+1536755684078,131,1,69,1029,s,qwertyuiopåasdfghjklöäzxcvbnm,vois,198.98438000000002,1983.125
+1536755684507,131,1,69,1458,i,qwertyuiopåasdfghjklöäzxcvbnm,voisi,934.10156,1721.875
+1536755684851,131,1,69,1802,t,qwertyuiopåasdfghjklöäzxcvbnm,voisit,583.2422,1748.125
+1536755685508,131,1,69,2459,k,qwertyuiopåasdfghjklöäzxcvbnm,voisitk,948.16406,2023.125
+1536755685720,131,1,69,2671,o,qwertyuiopåasdfghjklöäzxcvbnm,voisitko,1099.3359,1761.875
+1536755686089,131,1,69,3040, ,qwertyuiopåasdfghjklöäzxcvbnm,voisitko ,871.1719,2418.125
+1536755686397,131,1,69,3348,k,qwertyuiopåasdfghjklöäzxcvbnm,voisitko k,994.21875,2008.125
+1536755686706,131,1,69,3657,ä,qwertyuiopåasdfghjklöäzxcvbnm,voisitko kä,1360.5469,1975.0
+1536755687141,131,1,69,4092,y,qwertyuiopåasdfghjklöäzxcvbnm,voisitko käy,753.0469,1788.75
+1536755687438,131,1,69,4389,d,qwertyuiopåasdfghjklöäzxcvbnm,voisitko käyd,277.03125,2030.0
+1536755687907,131,1,69,4858,ä,qwertyuiopåasdfghjklöäzxcvbnm,voisitko käydä,1413.6328,1925.0
+1536755688327,131,1,69,5278, ,qwertyuiopåasdfghjklöäzxcvbnm,voisitko käydä ,674.2969,2396.25
+1536755688636,131,1,69,5587,k,qwertyuiopåasdfghjklöäzxcvbnm,voisitko käydä k,1016.3672,2003.75
+1536755689060,131,1,69,6011,a,qwertyuiopåasdfghjklöäzxcvbnm,voisitko käydä ka,123.046875,1993.75
+1536755689540,131,1,69,6491,u,qwertyuiopåasdfghjklöäzxcvbnm,voisitko käydä kau,914.0625,1791.25
+1536755690290,131,1,69,7241,p,qwertyuiopåasdfghjklöäzxcvbnm,voisitko käydä kaup,1252.2656,1766.25
+1536755690829,131,1,69,7780,a,qwertyuiopåasdfghjklöäzxcvbnm,voisitko käydä kaupa,90.0,2038.75
+1536755691079,131,1,69,8030,s,qwertyuiopåasdfghjklöäzxcvbnm,voisitko käydä kaupas,222.89062,2036.25
+1536755691245,131,1,69,8196,s,qwertyuiopåasdfghjklöäzxcvbnm,voisitko käydä kaupass,249.96094,2001.25
+1536755691495,131,1,69,8446,a,qwertyuiopåasdfghjklöäzxcvbnm,voisitko käydä kaupassa,69.96094000000001,2023.75
+1536755698653,131,1,51,0,p,qwertyuiopåasdfghjklöäzxcvbnm,p,1286.3672,1783.125
+1536755699644,131,1,51,991,i,qwertyuiopåasdfghjklöäzxcvbnm,pi,975.2344,1768.125
+1536755699961,131,1,51,1308,t,qwertyuiopåasdfghjklöäzxcvbnm,pit,571.9922,1743.125
+1536755700317,131,1,51,1664,ä,qwertyuiopåasdfghjklöäzxcvbnm,pitä,1404.4922,2001.875
+1536755700579,131,1,51,1926,ä,qwertyuiopåasdfghjklöäzxcvbnm,pitää,1411.5234,2001.25
+1536755700852,131,1,51,2199,k,qwertyuiopåasdfghjklöäzxcvbnm,pitääk,971.3672,2003.125
+1536755701101,131,1,51,2448,ö,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö,1293.3984,2003.125
+1536755701422,131,1,51,2769, ,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö ,556.1719,2453.75
+1536755702037,131,1,51,3384,m,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö m,1126.4062,2246.875
+1536755702318,131,1,51,3665,i,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö mi,990.35156,1843.125
+1536755702508,131,1,51,3855,n,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö min,996.3281,2218.75
+1536755702758,131,1,51,4105,u,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minu,853.2422,1806.25
+1536755702983,131,1,51,4330,n,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun,1013.2031,2218.125
+1536755703280,131,1,51,4627, ,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun ,606.09375,2448.125
+1536755703731,131,1,51,5078,a,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun a,47.8125,2031.875
+1536755704146,131,1,51,5493,j,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun aj,859.21875,1993.75
+1536755704455,131,1,51,5802,s,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun ajs,138.86719,1928.125
+1536755704646,131,1,51,5993,s,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun ajss,131.83594,1998.125
+1536755705296,131,1,51,6643,B,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun ajs,1341.5625,2231.875
+1536755705449,131,1,51,6796,B,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun aj,1334.5312,2223.75
+1536755706031,131,1,51,7378,a,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun aja,45.0,2006.25
+1536755706197,131,1,51,7544,a,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun ajaa,82.96875,1975.0
+1536755706530,131,1,51,7877, ,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun ajaa ,717.1875,2493.125
+1536755706898,131,1,51,8245,a,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun ajaa a,35.859375,2046.25
+1536755707358,131,1,51,8705,u,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun ajaa au,847.2656,1785.0
+1536755707608,131,1,51,8955,t,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun ajaa aut,605.03906,1778.125
+1536755708011,131,1,51,9358,o,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun ajaa auto,1113.3984,1751.875
+1536755708434,131,1,51,9781,a,qwertyuiopåasdfghjklöäzxcvbnm,pitääkö minun ajaa autoa,79.80469000000001,2008.75
+1536755715570,131,1,70,0,k,qwertyuiopåasdfghjklöäzxcvbnm,k,997.3828,2033.75
+1536755715875,131,1,70,305,ä,qwertyuiopåasdfghjklöäzxcvbnm,kä,1417.5,2008.75
+1536755716283,131,1,70,713,v,qwertyuiopåasdfghjklöäzxcvbnm,käv,734.0625,2236.875
+1536755716615,131,1,70,1045,o,qwertyuiopåasdfghjklöäzxcvbnm,kävo,1048.3594,1738.125
+1536755717398,131,1,70,1828,B,qwertyuiopåasdfghjklöäzxcvbnm,käv,1356.3281,2191.25
+1536755717781,131,1,70,2211,i,qwertyuiopåasdfghjklöäzxcvbnm,kävi,991.40625,1795.0
+1536755718018,131,1,70,2448,n,qwertyuiopåasdfghjklöäzxcvbnm,kävin,978.39844,2288.125
+1536755718268,131,1,70,2698, ,qwertyuiopåasdfghjklöäzxcvbnm,kävin ,735.1172,2518.125
+1536755718624,131,1,70,3054,o,qwertyuiopåasdfghjklöäzxcvbnm,kävin o,1172.4609,1773.75
+1536755719264,131,1,70,3694,s,qwertyuiopåasdfghjklöäzxcvbnm,kävin os,159.96094,1998.125
+1536755719662,131,1,70,4092,t,qwertyuiopåasdfghjklöäzxcvbnm,kävin ost,600.1172,1803.125
+1536755720081,131,1,70,4511,o,qwertyuiopåasdfghjklöäzxcvbnm,kävin osto,1097.2266,1753.125
+1536755720414,131,1,70,4844,k,qwertyuiopåasdfghjklöäzxcvbnm,kävin ostok,996.3281,2023.125
+1536755721183,131,1,70,5613,s,qwertyuiopåasdfghjklöäzxcvbnm,kävin ostoks,195.82031,2003.75
+1536755721651,131,1,70,6081,i,qwertyuiopåasdfghjklöäzxcvbnm,kävin ostoksi,1007.22656,1771.875
+1536755721877,131,1,70,6307,l,qwertyuiopåasdfghjklöäzxcvbnm,kävin ostoksil,1134.4922,1995.0
+1536755722078,131,1,70,6508,l,qwertyuiopåasdfghjklöäzxcvbnm,kävin ostoksill,1103.2031,2010.0
+1536755722498,131,1,70,6928,a,qwertyuiopåasdfghjklöäzxcvbnm,kävin ostoksilla,60.820312,2051.875
+1536755722987,131,1,70,7417, ,qwertyuiopåasdfghjklöäzxcvbnm,kävin ostoksilla ,748.125,2465.0
+1536755723344,131,1,70,7774,t,qwertyuiopåasdfghjklöäzxcvbnm,kävin ostoksilla t,602.9297,1765.0
+1536755723724,131,1,70,8154,ä,qwertyuiopåasdfghjklöäzxcvbnm,kävin ostoksilla tä,1408.3594,1973.125
+1536755724009,131,1,70,8439,n,qwertyuiopåasdfghjklöäzxcvbnm,kävin ostoksilla tän,1008.28125,2231.875
+1536755724269,131,1,70,8699,ä,qwertyuiopåasdfghjklöäzxcvbnm,kävin ostoksilla tänä,1408.3594,1948.75
+1536755724424,131,1,70,8854,ä,qwertyuiopåasdfghjklöäzxcvbnm,kävin ostoksilla tänää,1383.3984,1978.125
+1536755724637,131,1,70,9067,n,qwertyuiopåasdfghjklöäzxcvbnm,kävin ostoksilla tänään,973.125,2263.125
+1536755731021,131,1,12,0,m,qwertyuiopåasdfghjklöäzxcvbnm,m,1135.1953,2221.875
+1536755731315,131,1,12,294,i,qwertyuiopåasdfghjklöäzxcvbnm,mi,1003.3594,1773.75
+1536755731529,131,1,12,508,n,qwertyuiopåasdfghjklöäzxcvbnm,min,1036.4062,2211.25
+1536755731743,131,1,12,722,k,qwertyuiopåasdfghjklöäzxcvbnm,mink,977.34375,1966.25
+1536755731981,131,1,12,960,ä,qwertyuiopåasdfghjklöäzxcvbnm,minkä,1409.4141,1950.0
+1536755732314,131,1,12,1293, ,qwertyuiopåasdfghjklöäzxcvbnm,minkä ,583.2422,2516.875
+1536755732669,131,1,12,1648,n,qwertyuiopåasdfghjklöäzxcvbnm,minkä n,989.2969,2258.125
+1536755732871,131,1,12,1850,i,qwertyuiopåasdfghjklöäzxcvbnm,minkä ni,966.09375,1751.25
+1536755733037,131,1,12,2016,i,qwertyuiopåasdfghjklöäzxcvbnm,minkä nii,954.1406,1786.875
+1536755733322,131,1,12,2301,s,qwertyuiopåasdfghjklöäzxcvbnm,minkä niis,214.80469,2038.75
+1536755733595,131,1,12,2574,y,qwertyuiopåasdfghjklöäzxcvbnm,minkä niisy,696.09375,1775.0
+1536755734342,131,1,12,3321,B,qwertyuiopåasdfghjklöäzxcvbnm,minkä niis,1331.3672,2290.0
+1536755734799,131,1,12,3778,t,qwertyuiopåasdfghjklöäzxcvbnm,minkä niist,609.2578,1785.0
+1536755735156,131,1,12,4135,ä,qwertyuiopåasdfghjklöäzxcvbnm,minkä niistä,1416.4453,1963.75
+1536755735570,131,1,12,4549, ,qwertyuiopåasdfghjklöäzxcvbnm,minkä niistä ,647.22656,2486.25
+1536755736039,131,1,12,5018,v,qwertyuiopåasdfghjklöäzxcvbnm,minkä niistä v,767.1094,2211.25
+1536755736439,131,1,12,5418,a,qwertyuiopåasdfghjklöäzxcvbnm,minkä niistä va,55.898438,2026.25
+1536755736974,131,1,12,5953,l,qwertyuiopåasdfghjklöäzxcvbnm,minkä niistä val,1137.3047,2056.25
+1536755737224,131,1,12,6203,i,qwertyuiopåasdfghjklöäzxcvbnm,minkä niistä vali,975.2344,1778.75
+1536755737579,131,1,12,6558,t,qwertyuiopåasdfghjklöäzxcvbnm,minkä niistä valit,609.96094,1781.25
+1536755737887,131,1,12,6866,s,qwertyuiopåasdfghjklöäzxcvbnm,minkä niistä valits,140.97656,2056.25
+1536755738317,131,1,12,7296,i,qwertyuiopåasdfghjklöäzxcvbnm,minkä niistä valitsi,978.39844,1771.25
+1536755738554,131,1,12,7533,t,qwertyuiopåasdfghjklöäzxcvbnm,minkä niistä valitsit,576.21094,1801.25
+1536755745744,131,1,34,0,t,qwertyuiopåasdfghjklöäzxcvbnm,t,571.9922,1746.25
+1536755746134,131,1,34,390,a,qwertyuiopåasdfghjklöäzxcvbnm,ta,24.960938,1940.0
+1536755746807,131,1,34,1063,v,qwertyuiopåasdfghjklöäzxcvbnm,tav,737.22656,2218.75
+1536755747172,131,1,34,1428,a,qwertyuiopåasdfghjklöäzxcvbnm,tava,52.734375,1988.75
+1536755747505,131,1,34,1761,t,qwertyuiopåasdfghjklöäzxcvbnm,tavat,576.21094,1748.125
+1536755747838,131,1,34,2094,a,qwertyuiopåasdfghjklöäzxcvbnm,tavata,20.742188,2033.125
+1536755747992,131,1,34,2248,a,qwertyuiopåasdfghjklöäzxcvbnm,tavataa,74.88280999999999,1953.125
+1536755748613,131,1,34,2869,n,qwertyuiopåasdfghjklöäzxcvbnm,tavataan,1002.3047,2233.75
+1536755748872,131,1,34,3128, ,qwertyuiopåasdfghjklöäzxcvbnm,tavataan ,849.375,2410.0
+1536755749228,131,1,34,3484,k,qwertyuiopåasdfghjklöäzxcvbnm,tavataan k,1017.4219,1998.125
+1536755749812,131,1,34,4068,e,qwertyuiopåasdfghjklöäzxcvbnm,tavataan ke,299.8828,1788.125
+1536755750026,131,1,34,4282,s,qwertyuiopåasdfghjklöäzxcvbnm,tavataan kes,204.96094,1998.75
+1536755750486,131,1,34,4742,k,qwertyuiopåasdfghjklöäzxcvbnm,tavataan kesk,973.125,2036.25
+1536755750759,131,1,34,5015,u,qwertyuiopåasdfghjklöäzxcvbnm,tavataan kesku,859.21875,1783.125
+1536755751127,131,1,34,5383,s,qwertyuiopåasdfghjklöäzxcvbnm,tavataan keskus,200.03906,2008.125
+1536755751376,131,1,34,5632,t,qwertyuiopåasdfghjklöäzxcvbnm,tavataan keskust,609.2578,1808.125
+1536755751637,131,1,34,5893,a,qwertyuiopåasdfghjklöäzxcvbnm,tavataan keskusta,52.734375,2018.75
+1536755751863,131,1,34,6119,s,qwertyuiopåasdfghjklöäzxcvbnm,tavataan keskustas,204.96094,2016.25
+1536755752040,131,1,34,6296,s,qwertyuiopåasdfghjklöäzxcvbnm,tavataan keskustass,207.77344,2023.125
+1536755752207,131,1,34,6463,a,qwertyuiopåasdfghjklöäzxcvbnm,tavataan keskustassa,67.85155999999999,2018.75

@@ -1,0 +1,31 @@
+subject,age,Gender,Handness,use a computers,use touch,Time to type (h),Time to touch (h)
+101,28,female,right,Several times a day,Several times a day,30,15
+104,25,male,right,Several times a day,Several times a day,30,30
+105,26,female,right,Several times a day,Several times a day,10,2
+106,31,male,right,Several times a day,Several times a day,25,30
+107,25,female,right,Several times a day,Several times a day,26,8
+108,21,male,right,Several times a day,Several times a day,7.5,9
+109,24,female,right,A few times a week,Several times a day,6,10
+110,21,female,right,Once a day,Several times a day,4,7
+111,22,male,left,,,50,10
+112,20,female,right,A few times a month,Several times a day,0.5,8
+113,20,female,right,Several times a day,Several times a day,5,6
+114,25,female,right,A few times a month,Several times a day,0.5,8
+115,23,female,right,Several times a day,Several times a day,4,4.5
+116,20,female,left,Several times a day,Several times a day,9,15
+117,24,female,right,Several times a day,Several times a day,10,3
+118,21,male,right,Several times a day,Several times a day,4,3
+120,22,male,right,Several times a day,Several times a day,30,15
+121,29,female,right,Once a day,Several times a day,7,5
+122,18,male,right,Several times a day,Several times a day,30,30
+123,27,female,right,Several times a day,Several times a day,4,4
+124,24,female,right,A few times a week,Several times a day,3,20
+125,28,female,right,A few times a week,Several times a day,6,14
+126,45,male,right,Several times a day,Several times a day,30,10
+127,24,male,left,Several times a day,Several times a day,30,25
+128,41,male,right,Several times a day,Several times a day,20,10
+129,28,male,right,Several times a day,Several times a day,70,5
+130,20,male,right,Once a day,Several times a day,4,10
+131,28,female,right,Several times a day,Several times a day,3,10
+132,24,female,right,Several times a day,Once a day,12,10
+133,32,female,right,Several times a day,Several times a day,30,10
