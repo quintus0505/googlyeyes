@@ -6,3 +6,4 @@ data/one_hand_typinglog_data.csv
 .idea/
 log/
 tensorboard/
+amortized_inference/
