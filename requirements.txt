@@ -10,5 +10,6 @@ scikit-learn
 fastdtw
 tensorboard
 opencv-python
+matplotlib
 mesa
 Levenshtein

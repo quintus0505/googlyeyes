@@ -1,10 +1,10 @@
-import sys
-import os
 import logging
 import datetime
 import time
 
-# Detect the project root and add it to sys.path
+import sys
+import os
+# Detect the current directory and add it to the sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.append(project_root)
@@ -13,29 +13,29 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 from metrics.metrics import multi_match, dtw_scanpaths, sted_scanpaths
 from sklearn.model_selection import KFold
 import argparse
-from model.data import load_and_preprocess_data
+from data.data import load_and_preprocess_data
 import os.path as osp
 from config import GAZE_INFERENCE_DIR
-from model.nets import (
-    TypingGazeDataset,
-    TransformerModel,
+from src.nets import (
+    TypingGazeInferenceDataset,
+    GooglyeyesModel,
     multi_match_loss,
     finger_guiding_distance_loss,
     proofreading_loss,
 )
-from model.summary import Logger
+from src.summary import Logger
 
 from torch.utils.tensorboard import SummaryWriter
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
-saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'model', 'outputs')
+saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'src', 'outputs')
 
 
 def create_padding_mask(seq):
@@ -48,9 +48,9 @@ def trim_to_length(data, length):
 
 
 def train_model(
-        model_type='transformer',
-        include_duration=True,
+        model_type,
         include_key=False,
+        include_duration=True,
         k_folds=5,
         max_pred_len=32,
         use_k_fold=True,
@@ -66,19 +66,31 @@ def train_model(
 ):
     X_train, X_test, y_train, y_test, masks_x_train, masks_x_test, masks_y_train, masks_y_test, indices_train, indices_test, scaler_X, scaler_y, typing_data, gaze_data = load_and_preprocess_data(
         include_key, include_duration=True, max_pred_len=max_pred_len, data_use=data_use, fpath_header=fpath_header,
-        calculate_params=False)
-    if loss_type == 'custom':
+        calculate_params=True)
+    if loss_type == 'combined':
         lr = 0.00005
     else:
         lr = 0.0001
     if data_use != 'human':
         use_k_fold = False
-        # lr = 0.00001
-    input_dim = X_train.shape[2]  # Update input_dim to include the encoded keys if included
+
     num_epochs = num_epochs // k_folds if use_k_fold else num_epochs
+    user_params_train = X_train[:, :, 3:6]  # Shape (batch_size, seq_len, 3)
+    features_train = X_train[:, :, :3]  # Shape (batch_size, seq_len, 3)
+
+    # Similarly, for the test set
+    user_params_test = X_test[:, :, 3:6]  # Shape (batch_size, seq_len, 3)
+    features_test = X_test[:, :, :3]  # Shape (batch_size, seq_len, 3)
+
+    input_dim = features_train.shape[2]  # Update input_dim to include the encoded keys if included
+    user_params_dim = user_params_train.shape[2]
 
     def initialize_model():
-        return TransformerModel(input_dim=input_dim, output_dim=output_dim, dropout=0.1).to(device)
+        if model_type == "transformer":
+            return GooglyeyesModel(input_dim=input_dim, output_dim=output_dim,
+                                             user_param_dim=user_params_dim, dropout=0.1).to(device)
+        else:
+            raise ValueError("Unsupported model type")
 
     # Initialize the model, loss function, and optimizer
     output_dim = 3 if include_duration else 2  # Set output dimension based on whether duration is included
@@ -98,10 +110,7 @@ def train_model(
     scheduler = optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lr_lambda)
 
     # Save the model and scalers
-    model_filename = f'{model_type}_{loss_type}_{data_use}_model_with_key_with_duration.pth' if include_key and include_duration else \
-        f'{model_type}_{loss_type}_{data_use}_model_with_key_without_duration.pth' if include_key else \
-            f'{model_type}_{loss_type}_{data_use}_model_without_key_with_duration.pth' if include_duration else \
-                f'{model_type}_{loss_type}_{data_use}_model_without_key_without_duration.pth'
+    model_filename = f'amortized_inference_{model_type}_{data_use}_model.pth'
 
     if not osp.exists(saved_model_dir):
         os.makedirs(saved_model_dir)
@@ -113,15 +122,19 @@ def train_model(
             k_fold_lr = lr * 0.9 ** fold
             optimizer = optim.Adam(model.parameters(), lr=k_fold_lr, weight_decay=weight_decay_value)
             print(f'Fold {fold + 1}/{k_folds}')
-            X_fold_train, X_fold_val = X_train[train_idx], X_train[val_idx]
+            X_fold_train, X_fold_val = features_train[train_idx], features_train[val_idx]
             y_fold_train, y_fold_val = y_train[train_idx], y_train[val_idx]
             masks_x_fold_train, masks_x_fold_val = masks_x_train[train_idx], masks_x_train[val_idx]
             masks_y_fold_train, masks_y_fold_val = masks_y_train[train_idx], masks_y_train[val_idx]
-
-            train_dataset = TypingGazeDataset(X_fold_train, y_fold_train, masks_x_fold_train, masks_y_fold_train,
-                                              indices_train)
-            val_dataset = TypingGazeDataset(X_fold_val, y_fold_val, masks_x_fold_val, masks_y_fold_val, indices_train)
-            test_dataset = TypingGazeDataset(X_test, y_test, masks_x_test, masks_y_test, indices_test)
+            user_params_fold_train, user_params_fold_val = user_params_train[train_idx], user_params_train[val_idx]
+            train_dataset = TypingGazeInferenceDataset(X_fold_train, y_fold_train, masks_x_fold_train,
+                                                       masks_y_fold_train,
+                                                       indices_train, user_params_fold_train)
+            val_dataset = TypingGazeInferenceDataset(X_fold_val, y_fold_val, masks_x_fold_val, masks_y_fold_val,
+                                                     indices_train,
+                                                     user_params_fold_val)
+            test_dataset = TypingGazeInferenceDataset(features_test, y_test, masks_x_test, masks_y_test, indices_test,
+                                                      user_params_test)
             train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
             val_loader = DataLoader(val_dataset, batch_size=16, shuffle=False)
             test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
@@ -135,81 +148,66 @@ def train_model(
                 running_gaze_distance_loss = 0.0
                 running_proofreading_duration_loss = 0.0
                 running_proofreading_count_loss = 0.0
-                for inputs, targets, masks_x, masks_y, _ in train_loader:
-                    inputs, targets, masks_x, masks_y = inputs.to(device), targets.to(device), masks_x.to(
-                        device), masks_y.to(device)
+                for inputs, targets, masks_x, masks_y, indices, user_params in train_loader:  # Unpack all six values
+                    inputs, targets, masks_x, masks_y, user_params = inputs.to(device), targets.to(device), masks_x.to(
+                        device), masks_y.to(device), user_params.to(device)
                     src_mask = create_padding_mask(masks_x) if model_type == "transformer" else None
                     optimizer.zero_grad()
-                    gaze_mean, gaze_log_std, padding_outputs = model(inputs,
+                    gaze_mean, gaze_log_std, padding_outputs = model(inputs, user_params,
                                                                      src_mask) if model_type == "transformer" else model(
                         inputs)
-                    # Compute loss with masking
                     gaze_std = torch.exp(gaze_log_std)
                     epsilon = torch.randn_like(gaze_mean)  # Same shape as gaze_mean
                     gaze_outputs = gaze_mean + gaze_std * epsilon
-                    if loss_type == 'mse':
-                        gaze_loss = mse_loss(gaze_outputs[:max_pred_len], targets[:max_pred_len])
-                        gaze_loss = gaze_loss * masks_y.unsqueeze(-1)  # Apply mask to gaze loss
-                        gaze_loss = gaze_loss.sum() / masks_y.sum()  # Average only over non-padded elements
-                        padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
-                            padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
-                        padding_loss = padding_loss.sum() / masks_y.sum()  # Average only over non-padded elements
-
-                        loss = gaze_loss + padding_loss  # Combine the two losses
-                    elif loss_type == 'combined':
-                        padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
-                            padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
-                        padding_loss = padding_loss.sum() / masks_y.sum()
-                        typing_gaze_distance_loss, typing_gaze_count_loss = finger_guiding_distance_loss(
-                            gaze_outputs[:, 1:max_pred_len],
-                            targets[:max_pred_len],
-                            inputs,
-                            scaler_X,
-                            scaler_y,
-                            masks_x,
-                            masks_y[:, 1:max_pred_len],
-                            padding_outputs[:max_pred_len],
-                            max_pred_len=max_pred_len,
-                        )
-                        proofreading_duration_loss, proofreading_count_loss = proofreading_loss(
-                            gaze_outputs[:, 1:max_pred_len],
-                            targets[:max_pred_len],
-                            scaler_y,
-                            masks_y[:, 1:max_pred_len],
-                            padding_outputs[:max_pred_len],
-                            max_pred_len=max_pred_len,
-                        )
-                        gaze_multimatch_loss, _, _, _, _, _ = multi_match_loss(gaze_outputs[:max_pred_len],
-                                                                               targets[:max_pred_len],
-                                                                               scaler_y=scaler_y,
-                                                                               masks_y=masks_y,
-                                                                               predict_masks_y=padding_outputs[
-                                                                                               :max_pred_len],
-                                                                               pos_weight=0.5,
-                                                                               dur_weight=0.5)
-                        gaze_mse_loss = mse_loss(gaze_outputs[:max_pred_len], targets[:max_pred_len])
-                        gaze_mse_loss = gaze_mse_loss * masks_y.unsqueeze(-1)  # Apply mask to gaze loss
-                        gaze_mse_loss = gaze_mse_loss.sum() / masks_y.sum()  # Average only over non-padded elements
-                        loss = (
-                                gaze_multimatch_loss
-                                + padding_loss
-                                + gaze_mse_loss
-                                + typing_gaze_distance_loss
-                                + typing_gaze_count_loss
-                                + proofreading_duration_loss
-                                + proofreading_count_loss
-                        )
-                    else:
-                        raise ValueError("Unsupported loss function. Choose 'mse' or 'combined")
+                    # Compute loss with masking
+                    padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
+                        padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
+                    padding_loss = padding_loss.sum() / masks_y.sum()
+                    typing_gaze_distance_loss, typing_gaze_count_loss = finger_guiding_distance_loss(
+                        gaze_outputs[:, 1:max_pred_len],
+                        targets[:max_pred_len],
+                        inputs,
+                        scaler_X,
+                        scaler_y,
+                        masks_x,
+                        masks_y[:, 1:max_pred_len],
+                        padding_outputs[:max_pred_len],
+                        max_pred_len=max_pred_len,
+                    )
+                    proofreading_duration_loss, proofreading_count_loss = proofreading_loss(
+                        gaze_outputs[:, 1:max_pred_len],
+                        targets[:max_pred_len],
+                        scaler_y,
+                        masks_y[:, 1:max_pred_len],
+                        padding_outputs[:max_pred_len],
+                        max_pred_len=max_pred_len,
+                    )
+                    gaze_multimatch_loss, _, _, _, _, _ = multi_match_loss(gaze_outputs[:max_pred_len],
+                                                                           targets[:max_pred_len],
+                                                                           scaler_y=scaler_y,
+                                                                           masks_y=masks_y,
+                                                                           predict_masks_y=padding_outputs[
+                                                                                           :max_pred_len],
+                                                                           pos_weight=0.5,
+                                                                           dur_weight=0.5)
+                    gaze_mse_loss = mse_loss(gaze_outputs[:max_pred_len], targets[:max_pred_len])
+                    gaze_mse_loss = gaze_mse_loss * masks_y.unsqueeze(-1)  # Apply mask to gaze loss
+                    gaze_mse_loss = gaze_mse_loss.sum() / masks_y.sum()  # Average only over non-padded elements
+                    loss = (
+                            gaze_multimatch_loss
+                            + padding_loss
+                            + gaze_mse_loss
+                            + typing_gaze_distance_loss
+                            + typing_gaze_count_loss
+                            + proofreading_duration_loss
+                            + proofreading_count_loss
+                    )
 
                     loss.backward()
                     optimizer.step()
                     running_loss += loss.item()
-                    # running_gaze_padding_loss += (
-                    #         padding_loss.item() + gaze_multimatch_loss.item() + gaze_mse_loss.item()
-                    # )
                     running_gaze_padding_loss += (
-                            padding_loss.item() + gaze_multimatch_loss.item()
+                            padding_loss.item() + gaze_multimatch_loss.item() + gaze_mse_loss.item()
                     )
                     running_gaze_count_loss += typing_gaze_count_loss.item()
                     running_gaze_distance_loss += typing_gaze_distance_loss.item()
@@ -255,73 +253,60 @@ def train_model(
             val_loaders = [val_loader, test_loader]
             for loader in val_loaders:
                 with torch.no_grad():
-                    for inputs, targets, masks_x, masks_y, _ in loader:
-                        inputs, targets, masks_x, masks_y = inputs.to(device), targets.to(device), masks_x.to(
-                            device), masks_y.to(device)
+                    for inputs, targets, masks_x, masks_y, indices, user_params in loader:  # Unpack all six values
+                        inputs, targets, masks_x, masks_y, user_params = inputs.to(device), targets.to(
+                            device), masks_x.to(
+                            device), masks_y.to(device), user_params.to(device)
                         src_mask = create_padding_mask(masks_x) if model_type == "transformer" else None
-                        gaze_mean, gaze_log_std, padding_outputs = model(inputs,
+                        gaze_mean, gaze_log_std, padding_outputs = model(inputs, user_params,
                                                                          src_mask) if model_type == "transformer" else model(
                             inputs)
-                        # Compute loss with masking
                         gaze_std = torch.exp(gaze_log_std)
                         epsilon = torch.randn_like(gaze_mean)  # Same shape as gaze_mean
                         gaze_outputs = gaze_mean + gaze_std * epsilon
                         # Compute loss with masking
-                        if loss_type == 'mse':
-                            gaze_loss = mse_loss(gaze_outputs[:max_pred_len], targets[:max_pred_len])
-                            gaze_loss = gaze_loss * masks_y.unsqueeze(-1)  # Apply mask to gaze loss
-                            gaze_loss = gaze_loss.sum() / masks_y.sum()  # Average only over non-padded elements
-
-                            padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
-                                padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
-                            padding_loss = padding_loss.sum() / masks_y.sum()  # Average only over non-padded elements
-
-                            loss = gaze_loss + padding_loss  # Combine the two losses
-                        elif loss_type == 'combined':
-                            padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
-                                padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
-                            padding_loss = padding_loss.sum() / masks_y.sum()
-                            typing_gaze_distance_loss, typing_gaze_count_loss = finger_guiding_distance_loss(
-                                gaze_outputs[:, 1:max_pred_len],
-                                targets[:max_pred_len],
-                                inputs,
-                                scaler_X,
-                                scaler_y,
-                                masks_x,
-                                masks_y[:, 1:max_pred_len],
-                                padding_outputs[:max_pred_len],
-                                max_pred_len=max_pred_len,
-                            )
-                            proofreading_duration_loss, proofreading_count_loss = proofreading_loss(
-                                gaze_outputs[:, 1:max_pred_len],
-                                targets[:max_pred_len],
-                                scaler_y,
-                                masks_y[:, 1:max_pred_len],
-                                padding_outputs[:max_pred_len],
-                                max_pred_len=max_pred_len,
-                            )
-                            gaze_multimatch_loss, _, _, _, _, _ = multi_match_loss(gaze_outputs[:max_pred_len],
-                                                                                   targets[:max_pred_len],
-                                                                                   scaler_y=scaler_y,
-                                                                                   masks_y=masks_y,
-                                                                                   predict_masks_y=padding_outputs[
-                                                                                                   :max_pred_len],
-                                                                                   pos_weight=0.5,
-                                                                                   dur_weight=0.5)
-                            gaze_mse_loss = mse_loss(gaze_outputs[:max_pred_len], targets[:max_pred_len])
-                            gaze_mse_loss = gaze_mse_loss * masks_y.unsqueeze(-1)  # Apply mask to gaze loss
-                            gaze_mse_loss = gaze_mse_loss.sum() / masks_y.sum()  # Average only over non-padded elements
-                            loss = (
-                                    gaze_multimatch_loss
-                                    + padding_loss
-                                    + gaze_mse_loss
-                                    + typing_gaze_distance_loss
-                                    + typing_gaze_count_loss
-                                    + proofreading_duration_loss
-                                    + proofreading_count_loss
-                            )
-                        else:
-                            raise ValueError("Unsupported loss function. Choose 'mse' or 'combined")
+                        padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
+                            padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
+                        padding_loss = padding_loss.sum() / masks_y.sum()
+                        typing_gaze_distance_loss, typing_gaze_count_loss = finger_guiding_distance_loss(
+                            gaze_outputs[:, 1:max_pred_len],
+                            targets[:max_pred_len],
+                            inputs,
+                            scaler_X,
+                            scaler_y,
+                            masks_x,
+                            masks_y[:, 1:max_pred_len],
+                            padding_outputs[:max_pred_len],
+                            max_pred_len=max_pred_len,
+                        )
+                        proofreading_duration_loss, proofreading_count_loss = proofreading_loss(
+                            gaze_outputs[:, 1:max_pred_len],
+                            targets[:max_pred_len],
+                            scaler_y,
+                            masks_y[:, 1:max_pred_len],
+                            padding_outputs[:max_pred_len],
+                            max_pred_len=max_pred_len,
+                        )
+                        gaze_multimatch_loss, _, _, _, _, _ = multi_match_loss(gaze_outputs[:max_pred_len],
+                                                                               targets[:max_pred_len],
+                                                                               scaler_y=scaler_y,
+                                                                               masks_y=masks_y,
+                                                                               predict_masks_y=padding_outputs[
+                                                                                               :max_pred_len],
+                                                                               pos_weight=0.5,
+                                                                               dur_weight=0.5)
+                        gaze_mse_loss = mse_loss(gaze_outputs[:max_pred_len], targets[:max_pred_len])
+                        gaze_mse_loss = gaze_mse_loss * masks_y.unsqueeze(-1)  # Apply mask to gaze loss
+                        gaze_mse_loss = gaze_mse_loss.sum() / masks_y.sum()  # Average only over non-padded elements
+                        loss = (
+                                gaze_multimatch_loss
+                                + padding_loss
+                                + gaze_mse_loss
+                                + typing_gaze_distance_loss
+                                + typing_gaze_count_loss
+                                + proofreading_duration_loss
+                                + proofreading_count_loss
+                        )
 
                         val_loss += loss.item()
                         val_gaze_loss += gaze_multimatch_loss.item() + gaze_mse_loss.item() + padding_loss.item()
@@ -369,10 +354,12 @@ def train_model(
         torch.save(scaler_y, 'outputs/scaler_y.pth')
     else:
         # Use a simple train-test split instead of k-fold cross-validation
-        test_dataset = TypingGazeDataset(X_test, y_test, masks_x_test, masks_y_test, indices_test)
+        test_dataset = TypingGazeInferenceDataset(features_test, y_test, masks_x_test, masks_y_test, indices_test,
+                                                  user_params_test)
         test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
 
-        train_dataset = TypingGazeDataset(X_train, y_train, masks_x_train, masks_y_train, indices_train)
+        train_dataset = TypingGazeInferenceDataset(features_train, y_train, masks_x_train, masks_y_train, indices_train,
+                                                   user_params_train)
         train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)  # Use a larger batch size
 
         if continue_training and osp.exists(osp.join(saved_model_dir, model_filename)):
@@ -387,13 +374,15 @@ def train_model(
             for epoch in tqdm(range(start_epoch, start_epoch + pretrain_epochs)):
                 model.train()
                 running_padding_loss = 0.0
-                for inputs, targets, masks_x, masks_y, _ in train_loader:
-                    inputs, targets, masks_x, masks_y = inputs.to(device), targets.to(device), masks_x.to(
-                        device), masks_y.to(device)
+                for inputs, targets, masks_x, masks_y, indices, user_params in train_loader:  # Unpack all six values
+                    inputs, targets, masks_x, masks_y, user_params = inputs.to(device), targets.to(device), masks_x.to(
+                        device), masks_y.to(device), user_params.to(device)
                     src_mask = create_padding_mask(masks_x) if model_type == "transformer" else None
                     optimizer.zero_grad()
 
-                    _, _, padding_outputs = model(inputs, src_mask) if model_type == "transformer" else model(inputs)
+                    _, _, padding_outputs = model(inputs, user_params,
+                                                  src_mask) if model_type == "transformer" else model(
+                        inputs)
 
                     padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
                         padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
@@ -431,89 +420,75 @@ def train_model(
             running_gaze_distance_loss = 0.0
             running_proofreading_duration_loss = 0.0
             running_proofreading_count_loss = 0.0
-            for inputs, targets, masks_x, masks_y, _ in train_loader:
-                inputs, targets, masks_x, masks_y = inputs.to(device), targets.to(device), masks_x.to(
-                    device), masks_y.to(device)
+            for inputs, targets, masks_x, masks_y, indices, user_params in train_loader:  # Unpack all six values
+                inputs, targets, masks_x, masks_y, user_params = inputs.to(device), targets.to(device), masks_x.to(
+                    device), masks_y.to(device), user_params.to(device)
                 src_mask = create_padding_mask(masks_x) if model_type == "transformer" else None
                 optimizer.zero_grad()
-                gaze_mean, gaze_log_std, padding_outputs = model(inputs,
+                gaze_mean, gaze_log_std, padding_outputs = model(inputs, user_params,
                                                                  src_mask) if model_type == "transformer" else model(
                     inputs)
-                # Compute loss with masking
                 gaze_std = torch.exp(gaze_log_std)
                 epsilon = torch.randn_like(gaze_mean)  # Same shape as gaze_mean
                 gaze_outputs = gaze_mean + gaze_std * epsilon
                 # Compute loss with masking
-                if loss_type == 'mse':
-                    gaze_loss = mse_loss(gaze_outputs[:max_pred_len], targets[:max_pred_len])
-                    gaze_loss = gaze_loss * masks_y.unsqueeze(-1)  # Apply mask to gaze loss
-                    gaze_loss = gaze_loss.sum() / masks_y.sum()  # Average only over non-padded elements
+                padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
+                    padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
+                padding_loss = padding_loss.sum() / masks_y.sum()
+                typing_gaze_distance_loss, typing_gaze_count_loss = finger_guiding_distance_loss(
+                    gaze_outputs[:, 1:max_pred_len],
+                    targets[:max_pred_len],
+                    inputs,
+                    scaler_X,
+                    scaler_y,
+                    masks_x,
+                    masks_y[:, 1:max_pred_len],
+                    padding_outputs[:max_pred_len],
+                    max_pred_len=max_pred_len,
+                    distance_loss_ratio=distance_loss_ratio,
+                )
+                proofreading_duration_loss, proofreading_count_loss = proofreading_loss(
+                    gaze_outputs[:, 1:max_pred_len],
+                    targets[:max_pred_len],
+                    scaler_y,
+                    masks_y[:, 1:max_pred_len],
+                    padding_outputs[:max_pred_len],
+                    max_pred_len=max_pred_len,
+                    count_loss_ratio=count_loss_ratio,
+                )
 
-                    padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(padding_outputs[:max_pred_len],
-                                                                                        masks_y[:max_pred_len].float())
-                    padding_loss = padding_loss.sum() / masks_y.sum()  # Average only over non-padded elements
-
-                    loss = gaze_loss + padding_loss  # Combine the two losses
-                elif loss_type == 'combined':
-                    padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
-                        padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
-                    padding_loss = padding_loss.sum() / masks_y.sum()
-                    typing_gaze_distance_loss, typing_gaze_count_loss = finger_guiding_distance_loss(
-                        gaze_outputs[:, 1:max_pred_len],
-                        targets[:max_pred_len],
-                        inputs,
-                        scaler_X,
-                        scaler_y,
-                        masks_x,
-                        masks_y[:, 1:max_pred_len],
-                        padding_outputs[:max_pred_len],
-                        max_pred_len=max_pred_len,
-                        distance_loss_ratio=distance_loss_ratio,
-                    )
-                    proofreading_duration_loss, proofreading_count_loss = proofreading_loss(
-                        gaze_outputs[:, 1:max_pred_len],
-                        targets[:max_pred_len],
-                        scaler_y,
-                        masks_y[:, 1:max_pred_len],
-                        padding_outputs[:max_pred_len],
-                        max_pred_len=max_pred_len,
-                        count_loss_ratio=count_loss_ratio,
-                    )
-                    """At the beginning decrease the proofreading influence"""
-                    if epoch < 1000:
-                        proofreading_duration_loss_rate = 0.5
-                        proofreading_count_loss_rate = 0.5
-                    elif epoch < 2500:
-                        proofreading_duration_loss_rate = 0.75
-                        proofreading_count_loss_rate = 0.75
-                    else:
-                        proofreading_duration_loss_rate = 2
-                        proofreading_count_loss_rate = 2
-                    proofreading_duration_loss *= proofreading_duration_loss_rate
-                    proofreading_count_loss *= proofreading_count_loss_rate
-
-                    gaze_multimatch_loss, _, _, _, _, _ = multi_match_loss(gaze_outputs[:max_pred_len],
-                                                                           targets[:max_pred_len],
-                                                                           scaler_y=scaler_y,
-                                                                           masks_y=masks_y,
-                                                                           predict_masks_y=padding_outputs[
-                                                                                           :max_pred_len],
-                                                                           pos_weight=0.5,
-                                                                           dur_weight=0.5)
-                    gaze_mse_loss = mse_loss(gaze_outputs[:max_pred_len], targets[:max_pred_len])
-                    gaze_mse_loss = gaze_mse_loss * masks_y.unsqueeze(-1)  # Apply mask to gaze loss
-                    gaze_mse_loss = gaze_mse_loss.sum() / masks_y.sum()  # Average only over non-padded elements
-                    loss = (
-                            gaze_multimatch_loss
-                            + padding_loss
-                            + gaze_mse_loss
-                            + typing_gaze_distance_loss
-                            + typing_gaze_count_loss
-                            + proofreading_duration_loss
-                            + proofreading_count_loss
-                    )
+                """At the beginning decrease the proofreading influence"""
+                if epoch < 1000:
+                    proofreading_duration_loss_rate = 0.5
+                    proofreading_count_loss_rate = 0.5
+                elif epoch < 2500:
+                    proofreading_duration_loss_rate = 0.75
+                    proofreading_count_loss_rate = 0.75
                 else:
-                    raise ValueError("Unsupported loss function. Choose 'mse' or 'combined")
+                    proofreading_duration_loss_rate = 2
+                    proofreading_count_loss_rate = 2
+                proofreading_duration_loss *= proofreading_duration_loss_rate
+                proofreading_count_loss *= proofreading_count_loss_rate
+
+                gaze_multimatch_loss, _, _, _, _, _ = multi_match_loss(gaze_outputs[:max_pred_len],
+                                                                       targets[:max_pred_len],
+                                                                       scaler_y=scaler_y,
+                                                                       masks_y=masks_y,
+                                                                       predict_masks_y=padding_outputs[:max_pred_len],
+                                                                       pos_weight=0.5,
+                                                                       dur_weight=0.5)
+                gaze_mse_loss = mse_loss(gaze_outputs[:max_pred_len], targets[:max_pred_len])
+                gaze_mse_loss = gaze_mse_loss * masks_y.unsqueeze(-1)  # Apply mask to gaze loss
+                gaze_mse_loss = gaze_mse_loss.sum() / masks_y.sum()  # Average only over non-padded elements
+                loss = (
+                        gaze_multimatch_loss
+                        + padding_loss
+                        + gaze_mse_loss
+                        + typing_gaze_distance_loss
+                        + typing_gaze_count_loss
+                        + proofreading_duration_loss
+                        + proofreading_count_loss
+                )
 
                 loss.backward()
                 optimizer.step()
@@ -568,73 +543,61 @@ def train_model(
                 test_proofreading_duration_loss = 0.0
                 test_proofreading_count_loss = 0.0
                 with torch.no_grad():
-                    for inputs, targets, masks_x, masks_y, _ in test_loader:
-                        inputs, targets, masks_x, masks_y = inputs.to(device), targets.to(device), masks_x.to(
-                            device), masks_y.to(device)
+                    for inputs, targets, masks_x, masks_y, indices, user_params in test_loader:  # Unpack all six values
+                        inputs, targets, masks_x, masks_y, user_params = inputs.to(device), targets.to(
+                            device), masks_x.to(
+                            device), masks_y.to(device), user_params.to(device)
                         src_mask = create_padding_mask(masks_x) if model_type == "transformer" else None
-                        gaze_mean, gaze_log_std, padding_outputs = model(inputs,
+                        gaze_mean, gaze_log_std, padding_outputs = model(inputs, user_params,
                                                                          src_mask) if model_type == "transformer" else model(
                             inputs)
                         gaze_std = torch.exp(gaze_log_std)
                         epsilon = torch.randn_like(gaze_mean)  # Same shape as gaze_mean
                         gaze_outputs = gaze_mean + gaze_std * epsilon
                         # Compute loss with masking
-                        if loss_type == 'mse':
-                            gaze_loss = mse_loss(gaze_outputs[:max_pred_len], targets[:max_pred_len])
-                            gaze_loss = gaze_loss * masks_y.unsqueeze(-1)  # Apply mask to gaze loss
-                            gaze_loss = gaze_loss.sum() / masks_y.sum()  # Average only over non-padded elements
-
-                            padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
-                                padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
-                            padding_loss = padding_loss.sum() / masks_y.sum()  # Average only over non-padded elements
-
-                            loss = gaze_loss + padding_loss  # Combine the two losses
-                        elif loss_type == 'combined':
-                            padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
-                                padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
-                            padding_loss = padding_loss.sum() / masks_y.sum()
-                            typing_gaze_distance_loss, typing_gaze_count_loss = finger_guiding_distance_loss(
-                                gaze_outputs[:, 1:max_pred_len],
-                                targets[:max_pred_len],
-                                inputs,
-                                scaler_X,
-                                scaler_y,
-                                masks_x,
-                                masks_y[:, 1:max_pred_len],
-                                padding_outputs[:max_pred_len],
-                                max_pred_len=max_pred_len,
-                            )
-                            proofreading_duration_loss, proofreading_count_loss = proofreading_loss(
-                                gaze_outputs[:, 1:max_pred_len],
-                                targets[:max_pred_len],
-                                scaler_y,
-                                masks_y[:, 1:max_pred_len],
-                                padding_outputs[:max_pred_len],
-                                max_pred_len=max_pred_len,
-                                count_loss_ratio=count_loss_ratio,
-                            )
-                            gaze_multimatch_loss, _, _, _, _, _ = multi_match_loss(gaze_outputs[:max_pred_len],
-                                                                                   targets[:max_pred_len],
-                                                                                   scaler_y=scaler_y,
-                                                                                   masks_y=masks_y,
-                                                                                   predict_masks_y=padding_outputs[
-                                                                                                   :max_pred_len],
-                                                                                   pos_weight=0.5,
-                                                                                   dur_weight=0.5)
-                            gaze_mse_loss = mse_loss(gaze_outputs[:max_pred_len], targets[:max_pred_len])
-                            gaze_mse_loss = gaze_mse_loss * masks_y.unsqueeze(-1)  # Apply mask to gaze loss
-                            gaze_mse_loss = gaze_mse_loss.sum() / masks_y.sum()  # Average only over non-padded elements
-                            loss = (
-                                    gaze_multimatch_loss
-                                    + padding_loss
-                                    + gaze_mse_loss
-                                    + typing_gaze_distance_loss
-                                    + typing_gaze_count_loss
-                                    + proofreading_duration_loss
-                                    + proofreading_count_loss
-                            )
-                        else:
-                            raise ValueError("Unsupported loss function. Choose 'mse' or 'combined")
+                        padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
+                            padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
+                        padding_loss = padding_loss.sum() / masks_y.sum()
+                        typing_gaze_distance_loss, typing_gaze_count_loss = finger_guiding_distance_loss(
+                            gaze_outputs[:, 1:max_pred_len],
+                            targets[:max_pred_len],
+                            inputs,
+                            scaler_X,
+                            scaler_y,
+                            masks_x,
+                            masks_y[:, 1:max_pred_len],
+                            padding_outputs[:max_pred_len],
+                            max_pred_len=max_pred_len,
+                        )
+                        proofreading_duration_loss, proofreading_count_loss = proofreading_loss(
+                            gaze_outputs[:, 1:max_pred_len],
+                            targets[:max_pred_len],
+                            scaler_y,
+                            masks_y[:, 1:max_pred_len],
+                            padding_outputs[:max_pred_len],
+                            max_pred_len=max_pred_len,
+                            count_loss_ratio=count_loss_ratio,
+                        )
+                        gaze_multimatch_loss, _, _, _, _, _ = multi_match_loss(gaze_outputs[:max_pred_len],
+                                                                               targets[:max_pred_len],
+                                                                               scaler_y=scaler_y,
+                                                                               masks_y=masks_y,
+                                                                               predict_masks_y=padding_outputs[
+                                                                                               :max_pred_len],
+                                                                               pos_weight=0.5,
+                                                                               dur_weight=0.5)
+                        gaze_mse_loss = mse_loss(gaze_outputs[:max_pred_len], targets[:max_pred_len])
+                        gaze_mse_loss = gaze_mse_loss * masks_y.unsqueeze(-1)  # Apply mask to gaze loss
+                        gaze_mse_loss = gaze_mse_loss.sum() / masks_y.sum()  # Average only over non-padded elements
+                        loss = (
+                                gaze_multimatch_loss
+                                + padding_loss
+                                + gaze_mse_loss
+                                + typing_gaze_distance_loss
+                                + typing_gaze_count_loss
+                                + proofreading_duration_loss
+                                + proofreading_count_loss
+                        )
 
                         test_loss += loss.item()
                         test_gaze_loss += gaze_multimatch_loss.item() + gaze_mse_loss.item() + padding_loss.item()
@@ -674,11 +637,10 @@ def train_model(
 
 
 def test_model(
-        model_type='transformer',
-        include_duration=True,
+        model_type,
         include_key=False,
+        include_duration=True,
         max_pred_len=32,
-        loss_type='combined',
         log_index=[],
         data_use='human',
         fpath_header='train',
@@ -686,31 +648,42 @@ def test_model(
 ):
     X_train, X_test, y_train, y_test, masks_x_train, masks_x_test, masks_y_train, masks_y_test, indices_train, indices_test, scaler_X, scaler_y, typing_data, gaze_data = load_and_preprocess_data(
         include_key, include_duration=True, max_pred_len=max_pred_len, data_use=data_use, fpath_header=fpath_header,
-        calculate_params=False)
+        calculate_params=True)
 
     if use_best_model:
-        saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'model', 'best_outputs')
+        saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'src', 'best_outputs')
     else:
-        saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'model', 'outputs')
+        saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'src', 'outputs')
 
-    test_dataset = TypingGazeDataset(X_test, y_test, masks_x_test, masks_y_test, indices_test)
+    user_params_train = X_train[:, :, 3:6]  # Shape (batch_size, seq_len, 3)
+    features_train = X_train[:, :, :3]  # Shape (batch_size, seq_len, 3)
+
+    # Similarly, for the test set
+    user_params_test = X_test[:, :, 3:6]  # Shape (batch_size, seq_len, 3)
+    features_test = X_test[:, :, :3]  # Shape (batch_size, seq_len, 3)
+
+    test_dataset = TypingGazeInferenceDataset(features_test, y_test, masks_x_test, masks_y_test, indices_test,
+                                              user_params_test)
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 
-    train_dataset = TypingGazeDataset(X_train, y_train, masks_x_train, masks_y_train, indices_train)
-    train_loader = DataLoader(train_dataset, batch_size=1, shuffle=False)  # Process one trail at a time
+    train_dataset = TypingGazeInferenceDataset(features_train, y_train, masks_x_train, masks_y_train, indices_train,
+                                               user_params_train)
+    train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)  # Use a larger batch size
 
     # Initialize the model
-    input_dim = X_train.shape[2]  # Update input_dim to include the encoded keys if included
+    input_dim = features_train.shape[2]  # Update input_dim to include the encoded keys if included
+    user_params_dim = user_params_train.shape[2]
     output_dim = 3 if include_duration else 2  # Set output dimension based on whether duration is included
 
     def initialize_model():
-        return TransformerModel(input_dim=input_dim, output_dim=output_dim, dropout=0.1).to(device)
+        if model_type == "transformer":
+            return GooglyeyesModel(input_dim=input_dim, output_dim=output_dim,
+                                             user_param_dim=user_params_dim, dropout=0.1).to(device)
+        else:
+            raise ValueError("Unsupported model type. Choose 'transformer', 'lstm', 'rnn', or 'deit'.")
 
     model = initialize_model()
-    model_filename = f'{model_type}_{loss_type}_{data_use}_model_with_key_with_duration.pth' if include_key and include_duration else \
-        f'{model_type}_{loss_type}_{data_use}_model_with_key_without_duration.pth' if include_key else \
-            f'{model_type}_{loss_type}_{data_use}_model_without_key_with_duration.pth' if include_duration else \
-                f'{model_type}_{loss_type}_{data_use}_model_without_key_without_duration.pth'
+    model_filename = f'amortized_inference_{model_type}_{data_use}_model.pth'
     last_modified_time = time.ctime(os.path.getmtime(osp.join(saved_model_dir, model_filename)))
     print("Loading model from {}".format(osp.join(saved_model_dir, model_filename)))
     print(f"Model was last modified on: {last_modified_time}")
@@ -721,15 +694,15 @@ def test_model(
 
     if data_use != 'human':
         X_train, X_test, y_train, y_test, masks_x_train, masks_x_test, masks_y_train, masks_y_test, indices_train, indices_test, scaler_X, scaler_y, typing_data, gaze_data = load_and_preprocess_data(
-            include_key, include_duration=True, max_pred_len=max_pred_len, data_use='human',
-            fpath_header=fpath_header,
-            calculate_params=False)
-        test_dataset = TypingGazeDataset(X_test, y_test, masks_x_test, masks_y_test, indices_test)
+            include_key, include_duration=True, max_pred_len=max_pred_len, data_use='human', fpath_header=fpath_header,
+            calculate_params=True)
+        test_dataset = TypingGazeInferenceDataset(features_test, y_test, masks_x_test, masks_y_test, indices_test,
+                                                  user_params_test)
         human_test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 
-        train_dataset = TypingGazeDataset(X_train, y_train, masks_x_train, masks_y_train, indices_train)
+        train_dataset = TypingGazeInferenceDataset(features_train, y_train, masks_x_train, masks_y_train, indices_train,
+                                                   user_params_train)
         human_train_loader = DataLoader(train_dataset, batch_size=1, shuffle=False)  # Process one trail at a time
-
         # Initialize the model
         input_dim = X_train.shape[2]  # Update input_dim to include the encoded keys if included
         output_dim = 3 if include_duration else 2  # Set output dimension based on whether duration is included
@@ -750,20 +723,21 @@ def test_model(
             running_proofreading_duration_loss = 0.0
             running_proofreading_count_loss = 0.0
             print("Testing in {} data".format("training" if data_loader == train_loader else "testing"))
-            for inputs, targets, masks_x, masks_y, index in tqdm(data_loader):
+            for inputs, targets, masks_x, masks_y, index, user_params in tqdm(data_loader):
                 try:
                     # get the max trailtime in typing_data
                     current_typing_data = typing_data[typing_data['index'] == index[0]]
                     max_trailtime = current_typing_data['trailtime'].max()
-                    inputs, targets, masks_x, masks_y = inputs.to(device), targets.to(device), masks_x.to(
-                        device), masks_y.to(device)
+                    inputs, targets, masks_x, masks_y, user_params = inputs.to(device), targets.to(device), masks_x.to(
+                        device), masks_y.to(device), user_params.to(device)
                     inputs = inputs.squeeze(0)  # Remove batch dimension
                     targets = targets.squeeze(0)  # Remove batch dimension
                     masks_x = masks_x.squeeze(0)  # Remove batch dimension
                     masks_y = masks_y.squeeze(0)  # Remove batch dimension
+                    user_params = user_params.squeeze(0)
 
                     src_mask = create_padding_mask(masks_x.unsqueeze(0)) if model_type == "transformer" else None
-                    gaze_mean, gaze_log_std, padding_outputs = model(inputs.unsqueeze(0),
+                    gaze_mean, gaze_log_std, padding_outputs = model(inputs.unsqueeze(0), user_params.unsqueeze(0),
                                                                      src_mask) if model_type == "transformer" else model(
                         inputs.unsqueeze(0))
                     gaze_std = torch.exp(gaze_log_std)
@@ -824,61 +798,48 @@ def test_model(
                         print(f'STED Score: {sted_dist}')
 
                     # Compute loss with masking
-                    if loss_type == 'mse':
-                        gaze_loss = mse_loss(gaze_outputs[:max_pred_len], targets[:max_pred_len])
-                        gaze_loss = gaze_loss * masks_y.unsqueeze(-1)  # Apply mask to gaze loss
-                        gaze_loss = gaze_loss.sum() / masks_y.sum()  # Average only over non-padded elements
+                    padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
+                        padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
+                    padding_loss = padding_loss.sum() / masks_y.sum()
+                    typing_gaze_distance_loss, typing_gaze_count_loss = finger_guiding_distance_loss(
+                        gaze_outputs[1:max_pred_len],
+                        targets[:max_pred_len],
+                        inputs,
+                        scaler_X,
+                        scaler_y,
+                        masks_x,
+                        masks_y[1:max_pred_len],
+                        padding_outputs[:max_pred_len],
+                        max_pred_len=max_pred_len,
+                    )
+                    proofreading_duration_loss, proofreading_count_loss = proofreading_loss(
+                        gaze_outputs[1:max_pred_len],
+                        targets[:max_pred_len],
+                        scaler_y,
+                        masks_y[1:max_pred_len],
+                        padding_outputs[:max_pred_len],
+                        max_pred_len=max_pred_len,
+                    )
+                    gaze_multimatch_loss, _, _, _, _, _ = multi_match_loss(gaze_outputs[:max_pred_len],
+                                                                           targets[:max_pred_len],
+                                                                           scaler_y=scaler_y,
+                                                                           masks_y=masks_y,
+                                                                           predict_masks_y=padding_outputs,
+                                                                           pos_weight=0.5,
+                                                                           dur_weight=0.5)
+                    gaze_mse_loss = mse_loss(gaze_outputs[:max_pred_len], targets[:max_pred_len])
+                    gaze_mse_loss = gaze_mse_loss * masks_y.unsqueeze(-1)  # Apply mask to gaze loss
+                    gaze_mse_loss = gaze_mse_loss.sum() / masks_y.sum()  # Average only over non-padded elements
+                    gaze_loss = gaze_multimatch_loss + gaze_mse_loss
+                    loss = gaze_multimatch_loss + padding_loss + gaze_mse_loss + \
+                           typing_gaze_distance_loss + typing_gaze_count_loss + \
+                           proofreading_duration_loss + proofreading_count_loss
 
-                        padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
-                            padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
-                        padding_loss = padding_loss.sum() / masks_y.sum()  # Average only over non-padded elements
-
-                        loss = gaze_loss + padding_loss  # Combine the two losses
-                    elif loss_type == 'combined':
-                        padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
-                            padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
-                        padding_loss = padding_loss.sum() / masks_y.sum()
-                        typing_gaze_distance_loss, typing_gaze_count_loss = finger_guiding_distance_loss(
-                            gaze_outputs[1:max_pred_len],
-                            targets[:max_pred_len],
-                            inputs,
-                            scaler_X,
-                            scaler_y,
-                            masks_x,
-                            masks_y[1:max_pred_len],
-                            padding_outputs[:max_pred_len],
-                            max_pred_len=max_pred_len,
-                        )
-                        proofreading_duration_loss, proofreading_count_loss = proofreading_loss(
-                            gaze_outputs[1:max_pred_len],
-                            targets[:max_pred_len],
-                            scaler_y,
-                            masks_y[1:max_pred_len],
-                            padding_outputs[:max_pred_len],
-                            max_pred_len=max_pred_len,
-                        )
-                        gaze_multimatch_loss, _, _, _, _, _ = multi_match_loss(gaze_outputs[:max_pred_len],
-                                                                               targets[:max_pred_len],
-                                                                               scaler_y=scaler_y,
-                                                                               masks_y=masks_y,
-                                                                               predict_masks_y=padding_outputs,
-                                                                               pos_weight=0.5,
-                                                                               dur_weight=0.5)
-                        gaze_mse_loss = mse_loss(gaze_outputs[:max_pred_len], targets[:max_pred_len])
-                        gaze_mse_loss = gaze_mse_loss * masks_y.unsqueeze(-1)  # Apply mask to gaze loss
-                        gaze_mse_loss = gaze_mse_loss.sum() / masks_y.sum()  # Average only over non-padded elements
-                        gaze_loss = gaze_multimatch_loss + gaze_mse_loss
-                        loss = gaze_multimatch_loss + padding_loss + gaze_mse_loss + \
-                               typing_gaze_distance_loss + typing_gaze_count_loss + \
-                               proofreading_duration_loss + proofreading_count_loss
-
-                        running_gaze_loss += gaze_loss.item()
-                        running_gaze_count_loss += typing_gaze_count_loss.item()
-                        running_gaze_distance_loss += typing_gaze_distance_loss.item()
-                        running_proofreading_duration_loss += proofreading_duration_loss.item()
-                        running_proofreading_count_loss += proofreading_count_loss.item()
-                    else:
-                        raise ValueError("Unsupported loss function. Choose 'mse' or 'combined")
+                    running_gaze_loss += gaze_loss.item()
+                    running_gaze_count_loss += typing_gaze_count_loss.item()
+                    running_gaze_distance_loss += typing_gaze_distance_loss.item()
+                    running_proofreading_duration_loss += proofreading_duration_loss.item()
+                    running_proofreading_count_loss += proofreading_count_loss.item()
 
                     logger.record_loss_item(loss.item(), gaze_loss.item(), padding_loss.item())
                     logger.build_dataframes(valid_gaze_outputs, valid_targets, index)
@@ -892,7 +853,7 @@ def test_model(
             print("Average proofreading count loss: ", running_proofreading_count_loss / len(data_loader))
     # get the ground truth gaze data metrics
     # np array concat test and trian
-    indices = np.concatenate([indices_test])
+    indices = np.concatenate([indices_train, indices_test])
     logger.print_ground_truth_metrics(indices=indices)
     logger.print_best_result()
 
@@ -903,21 +864,22 @@ def main():
     parser = argparse.ArgumentParser(description="Train or Test Baseline Model for Gaze Prediction")
 
     parser.add_argument("--model_type", type=str, choices=['transformer'],
-                        default='transformer', help="Type of model to train/test")
+                        default='transformer',
+                        help="Type of model to train/test")
     parser.add_argument("--train", action="store_true", help="Train the model", default=False)
     parser.add_argument("--test", action="store_true", help="Test the model", default=False)
     parser.add_argument("--k_folds", type=int, default=12, help="Number of folds for k-fold cross-validation")
     parser.add_argument("--max_pred_len", type=int, default=32, help="Maximum number of gaze data points to predict")
     parser.add_argument("--use_k_fold", action="store_true", help="Use k-fold cross-validation", default=True)
-    parser.add_argument("--num_epochs", type=int, default=60, help="Number of epochs to train the model")
+    parser.add_argument("--num_epochs", type=int, default=8000, help="Number of epochs to train the model")
     parser.add_argument("--all", action="store_true", help="Train and test all the model", default=False)
     parser.add_argument("--loss_type", type=str, choices=['mse', 'combined'], default='combined',
                         help="Loss function to use for training")
-    parser.add_argument("--data_use", type=str, choices=['both', 'human', 'simulated'], default='human',
+    parser.add_argument("--data_use", type=str, choices=['both', 'human'], default='both',
                         help="Use human data, simulated data, or both")
     parser.add_argument("--fpath_header", type=str, default='final_distribute', help='File path header for data use')
     parser.add_argument("--continue-training", action="store_true", help="Continue Train the model", default=True)
-    parser.add_argument("--start_epoch", type=int, help="Starting epoch for continue training", default=0)
+    parser.add_argument("--start_epoch", type=int, help="Starting epoch for continue training", default=6500)
     parser.add_argument("--pretrain-padding", action="store_true", help="Pretrain the Padding", default=False)
     parser.add_argument("--pretrain-epochs", type=int, help="pretraining epoch for padding training", default=200)
     parser.add_argument("--use-best-model", action="store_true", help="Use the best model for testing", default=True)
@@ -960,7 +922,7 @@ def main():
 
     if args.train:
         train_model(
-            args.model_type,
+            model_type=args.model_type,
             k_folds=args.k_folds,
             max_pred_len=args.max_pred_len,
             use_k_fold=args.use_k_fold,
@@ -976,9 +938,8 @@ def main():
         )
     if args.test:
         test_model(
-            args.model_type,
+            model_type=args.model_type,
             max_pred_len=args.max_pred_len,
-            loss_type=args.loss_type,
             log_index=[],
             data_use=args.data_use,
             fpath_header=args.fpath_header,

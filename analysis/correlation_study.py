@@ -4,8 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-from config import how_we_type_key_coordinate, HOW_WE_TYPE_TYPING_LOG_DATA_DIR, HOW_WE_TYPE_GAZE_DATA_DIR, \
-    HOW_WE_TYPE_FINGER_DATA_DIR, GAZE_INFERENCE_DIR
+from config import HOW_WE_TYPE_TYPING_LOG_DATA_DIR, HOW_WE_TYPE_GAZE_DATA_DIR, GAZE_INFERENCE_DIR
 from sklearn.preprocessing import normalize
 from scipy.stats import pearsonr
 from sklearn.metrics.pairwise import cosine_similarity

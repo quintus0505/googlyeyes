@@ -1,8 +1,5 @@
 import pandas as pd
-import numpy as np
-import textdistance
 import Levenshtein as lev
-import os.path as osp
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', 100)
@@ -937,10 +934,6 @@ def track_typing_errors(reference, typed):
     committed = rebuild_committed_sentence(typed)
     C, INF, deletion_indices, insertion_indices, substitution_indices = calculate_C_INF(reference, committed)
     # add 1 to every element to insertion_indices
-    insertion_indices = [i + 1 for i in insertion_indices]
-    # print("deletion_indices", deletion_indices)
-    # print("substitution_indices", substitution_indices)
-    # print("insertion_indices", insertion_indices)
     F = typed.count("<")
     simply_typed = simplify_typed_text(typed)
     # print("simply_typed", simply_typed)
@@ -950,26 +943,3 @@ def track_typing_errors(reference, typed):
 
 if __name__ == "__main__":
     pass
-    reference_sentence = "the quick brown"
-    user_input = "th quick brpown"
-    input_stream = "th quxck<<<ick brpown"
-
-    # reference_sentence = "the quick brown"
-    # user_input = "the quikc brown"
-    # input_stream = "the quikc brown"
-
-    user_input = 'Was wondering if you and Natalie connected?'
-    input_stream = 'Was c<wimedrting <<<<<<<<<<ondering if you and Natalie conce<<nected ?<<v< <?'
-    reference_sentence = "Was wondering if you and Natalie connected?"
-    # test_phrase(reference_sentence, user_input, input_stream)
-    # reference_sentence = 'lähetä paperit minulle'
-    # user_input = 'lähetä paperit minulm'
-    # input_stream = 'lähet<tä paperit minulm'
-    # test_phrase(reference_sentence, user_input, input_stream)
-
-    # input_stream = 'I was planning on calling you after I swa revisionh<s <s<.eof'
-    # user_input = 'I was planning on calling you after I swa revisions.eof'
-    # reference_sentence = 'I was planning on calling you after I saw your revisions.eof'
-    uncorrected_error_rate, corrected_error_rate = compute_error_rate(reference_sentence, user_input, input_stream)
-    print("uncorrected error rate: ", uncorrected_error_rate)
-    print("corrected error rate: ", corrected_error_rate)

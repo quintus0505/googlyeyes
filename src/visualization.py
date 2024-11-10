@@ -1,15 +1,20 @@
+import sys
 import os
+# Detect the current directory and add it to the sys.path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(current_dir, '..'))
+sys.path.append(project_root)
 import os.path as osp
 import numpy as np
 import time
 import pygame
 import torch
 from config import GAZE_INFERENCE_DIR
-from model.nets import TransformerModel, create_target_mask
-from model.data import load_human_data, load_and_preprocess_data, rebuild_input, \
+from src.nets import TransformerModel
+from data.data import load_and_preprocess_data, rebuild_input, \
     calculate_single_trail_gaze_metrics, calculate_single_trail_finger_metrics, DEFAULT_DATA_DIR
-from model.nets import GooglyeyesModel, TypingGazeInferenceDataset, TypingGazeDataset
-from torch.utils.data import DataLoader, Dataset
+from src.nets import GooglyeyesModel, TypingGazeInferenceDataset, TypingGazeDataset
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 import shutil
 import pandas as pd
@@ -18,7 +23,7 @@ import cv2
 keyboard_image = osp.join(GAZE_INFERENCE_DIR, 'figs', 'chi_keyboard.png')
 img_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'baseline_validation')
 video_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'videos')
-saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'model', 'best_outputs')
+saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'src', 'best_outputs')
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
@@ -614,7 +619,6 @@ def main():
                         help="Source of gaze data to visualize")
     parser.add_argument("--method", type=str, default='video', help='visualization method', choices=['video', 'image'])
     args = parser.parse_args()
-    print("visualizing with model type: ", args.model_type)
     print("Visualizing with data use: ", args.data_use)
     print("Using amortized inference:", args.amortized_inference)
     if args.amortized_inference:

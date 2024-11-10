@@ -9,14 +9,14 @@ sys.path.append(project_root)
 import pandas as pd
 import os.path as osp
 import os
-from config import DEFAULT_DATA_DIR, DEFAULT_ROOT_DIR, GAZE_INFERENCE_DIR
+from config import DEFAULT_DATA_DIR, GAZE_INFERENCE_DIR
 from config import how_we_type_filtered_trails_one_finger, how_we_type_key_coordinate
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 import pickle
 from tqdm import tqdm
 from torchmetrics.text import CharErrorRate
-from model.nets import AmortizedInferenceMLP
+from src.nets import AmortizedInferenceMLP
 import torch
 
 # Define file names and columns
@@ -375,7 +375,7 @@ def load_human_data(calculate_params=False):
         hidden_size = 128  # Can be adjusted
         output_size = 3  # Use only the first 3 dimensions of params
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model_save_path = os.path.join(GAZE_INFERENCE_DIR, "model", "best_outputs", "amortized_inference.pth")
+        model_save_path = os.path.join(GAZE_INFERENCE_DIR, "src", "../src/best_outputs", "amortized_inference.pth")
         model = AmortizedInferenceMLP(input_size, hidden_size, output_size).to(device)
         model.load_state_dict(torch.load(model_save_path))
         model.eval()

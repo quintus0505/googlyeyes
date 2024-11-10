@@ -1,12 +1,18 @@
+import sys
 import os
+
+# Detect the current directory and add it to the sys.path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(current_dir, '..'))
+sys.path.append(project_root)
 import time
 import os.path as osp
 import numpy as np
 import pygame
 import torch
 from config import GAZE_INFERENCE_DIR
-from model.nets import TransformerModel, GooglyeyesModel, create_target_mask, TypingGazeInferenceDataset
-from model.data import load_and_preprocess_data, calculate_gaze_metrics
+from src.nets import TransformerModel, GooglyeyesModel, TypingGazeInferenceDataset
+from data.data import load_and_preprocess_data, calculate_gaze_metrics
 from config import how_we_type_key_coordinate_resized
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -16,12 +22,11 @@ from correlation_study import plot_distances, FIG_DIR
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from model.nets import TypingGazeDataset
+from src.nets import TypingGazeDataset
 
 keyboard_image_path = osp.join(GAZE_INFERENCE_DIR, 'figs', 'chi_keyboard.png')
 video_output_dir = osp.join(GAZE_INFERENCE_DIR, 'figs', 'videos')
-# saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'model', 'outputs')
-saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'model', 'best_outputs')
+saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'src', 'best_outputs')
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
@@ -1813,15 +1818,16 @@ def main():
     parser.add_argument("--model_type", choices=["transformer"], default="transformer",
                         help="Type of model to use for prediction")
     parser.add_argument("--max_pred_len", type=int, default=32, help="Maximum number of gaze data points to predict")
-    parser.add_argument("--loss_type", type=str, choices=['mse', 'combined'], default='combined',
-                        help="Loss function to use for training")
+    parser.add_argument("--loss_type", type=str, choices=['combined'], default='combined',
+                        help="Loss function to use for training, use the default value as 'combined")
     parser.add_argument("--data_use", type=str, choices=['both', 'human'], default='both',
                         help="Use human data, simulated data, or both")
-    parser.add_argument("--fpath_header", type=str, default='final_distribute', help='File path header for data use')
+    parser.add_argument("--fpath_header", type=str, default='final_distribute',
+                        help='File path header for data use, currently use the default value')
     parser.add_argument("--amortized-inference", action="store_true", help="Use amortized inference", default=True)
-    parser.add_argument("--user_index", type=str, default=None, choices=['129', '130', '131', '132', '133', None])
+    parser.add_argument("--user_index", type=str, default=None, choices=['129', '130', '131', '132', '133', None],
+                        help="Specific user for analysis")
     args = parser.parse_args()
-    print("visualizing with model type: ", args.model_type)
     print("Visualizing with data use: ", args.data_use)
     print("Using amortized inference:", args.amortized_inference)
     analysis(args.model_type, 32, args.loss_type, args.data_use, args.fpath_header, args.amortized_inference,

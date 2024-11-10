@@ -1,6 +1,6 @@
 import numpy as np
 import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 import torch
 
 

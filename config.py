@@ -1,7 +1,6 @@
 import os.path as osp
-import os
 
-DEFAULT_ROOT_DIR =osp.join((osp.abspath(osp.dirname(__file__))))
+DEFAULT_ROOT_DIR = osp.join((osp.abspath(osp.dirname(__file__))))
 GAZE_INFERENCE_DIR = osp.join((osp.abspath(osp.dirname(__file__))))
 DEFAULT_DATA_DIR = osp.join(GAZE_INFERENCE_DIR, 'data')
 HOW_WE_TYPE_DATA_DIR = osp.join(GAZE_INFERENCE_DIR, 'data', 'how_we_type')
@@ -119,7 +118,6 @@ how_we_type_key_coordinate_resized = {
     'shift': [0, 1576, 196, 1749],
     'symbol': [0, 1749, 269, 1920],
     'enter': [763, 1749, 1080, 1920]}
-
 
 gboard_coordinate = {
     'q': [2, 1171, 109, 1326],

@@ -1,4 +1,4 @@
-from model.data import calculate_gaze_metrics
+from data.data import calculate_gaze_metrics
 import numpy as np
 import pandas as pd
 
