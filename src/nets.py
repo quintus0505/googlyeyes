@@ -170,6 +170,27 @@ class TransformerModel(nn.Module):
         return gaze_mean, gaze_log_std, padding_output
 
 
+class LSTMModel(nn.Module):
+    def __init__(self, input_dim, output_dim, hidden_dim=256, num_layers=4, dropout=0.1):
+        super(LSTMModel, self).__init__()
+        self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True, dropout=dropout)
+        self.fc = nn.Linear(hidden_dim, output_dim)
+        self.padding_fc = nn.Linear(hidden_dim, 1)  # Predict padding
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x):
+        x, _ = self.lstm(x)
+        x = self.dropout(x)
+
+        gaze_output = self.fc(x)  # Gaze predictions
+        # make sure the padding prediction is positive
+        padding_output = self.padding_fc(x).squeeze(-1)  # Padding predictions
+        # make the padding 0 or 1
+        padding_output = torch.sigmoid(padding_output)
+
+        return gaze_output, padding_output
+
+
 # Create a mask for target sequences (to prevent seeing future tokens)
 def create_target_mask(size):
     mask = torch.triu(torch.ones(size, size) == 1).transpose(0, 1)

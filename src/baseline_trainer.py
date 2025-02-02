@@ -156,6 +156,13 @@ def train_model(
                         padding_loss = padding_loss.sum() / masks_y.sum()  # Average only over non-padded elements
 
                         loss = gaze_loss + padding_loss  # Combine the two losses
+
+                        gaze_multimatch_loss = torch.tensor(0)
+                        typing_gaze_distance_loss = torch.tensor(0)
+                        typing_gaze_count_loss = torch.tensor(0)
+                        proofreading_duration_loss = torch.tensor(0)
+                        proofreading_count_loss = torch.tensor(0)
+
                     elif loss_type == 'combined':
                         padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
                             padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
@@ -277,6 +284,14 @@ def train_model(
                             padding_loss = padding_loss.sum() / masks_y.sum()  # Average only over non-padded elements
 
                             loss = gaze_loss + padding_loss  # Combine the two losses
+
+                            gaze_multimatch_loss = torch.tensor(0)
+                            typing_gaze_distance_loss = torch.tensor(0)
+                            typing_gaze_count_loss = torch.tensor(0)
+                            proofreading_duration_loss = torch.tensor(0)
+                            proofreading_count_loss = torch.tensor(0)
+                            gaze_mse_loss = torch.tensor(0)
+
                         elif loss_type == 'combined':
                             padding_loss = torch.nn.functional.binary_cross_entropy_with_logits(
                                 padding_outputs[:max_pred_len], masks_y[:max_pred_len].float())
@@ -689,9 +704,9 @@ def test_model(
         calculate_params=False)
 
     if use_best_model:
-        saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'scr', 'best_outputs')
+        saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'src', 'best_outputs')
     else:
-        saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'scr', 'outputs')
+        saved_model_dir = osp.join(GAZE_INFERENCE_DIR, 'src', 'outputs')
 
     test_dataset = TypingGazeDataset(X_test, y_test, masks_x_test, masks_y_test, indices_test)
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
@@ -902,7 +917,7 @@ def test_model(
 def main():
     parser = argparse.ArgumentParser(description="Train or Test Baseline Model for Gaze Prediction")
 
-    parser.add_argument("--model_type", type=str, choices=['transformer'],
+    parser.add_argument("--model_type", type=str, choices=['transformer', 'lstm'],
                         default='transformer', help="Type of model to train/test")
     parser.add_argument("--train", action="store_true", help="Train the model", default=False)
     parser.add_argument("--test", action="store_true", help="Test the model", default=False)
@@ -911,7 +926,7 @@ def main():
     parser.add_argument("--use_k_fold", action="store_true", help="Use k-fold cross-validation", default=True)
     parser.add_argument("--num_epochs", type=int, default=6000, help="Number of epochs to train the model")
     parser.add_argument("--all", action="store_true", help="Train and test all the model", default=False)
-    parser.add_argument("--loss_type", type=str, choices=['mse', 'combined'], default='combined',
+    parser.add_argument("--loss_type", type=str, choices=['mse', 'combined'], default='mse',
                         help="Loss function to use for training")
     parser.add_argument("--data_use", type=str, choices=['both', 'human', 'simulated'], default='human',
                         help="Use human data, simulated data, or both")
